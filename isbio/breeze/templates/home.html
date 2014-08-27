@@ -14,6 +14,7 @@
 
   <script type="text/javascript" src="/static/js/jquery.jqplot.min.js"></script>
   <script type="text/javascript" src="/static/plugins/jqplot.json2.min.js"></script>
+  <script type="text/javascript" src="/static/plugins/jqplot.dateAxisRenderer.js"></script>
   
   <style>
     .thumbnails .span4:nth-child(3n+1) {
@@ -294,7 +295,7 @@
                   <div class="row-fluid">
                     <div class="span12">
                       <!-- user statistics data -->
-                       <div id="chartdiv" style="height:400px;width:300px; ">
+                       <div id="chartdiv" >
                        </div>
                     </div>
                   </div>
@@ -396,16 +397,53 @@
     }
   }
 
-
-  var plot1 = $.jqplot('chartdiv', [[[1, 2],[3,5.12],[5,13.1],[7,33.6],[9,85.9],[11,219.9]]]);
-
+  //plot the user statistics
    $('#statistics_menu a[href="#user_stat_tab"]').click(function (e) {
       e.preventDefault();
       $(this).tab('show');
-      if (plot1._drawCount === 0) {
-          plot1.replot();
-      }
-      })
+      
+      // data render via ajax
+      var ajaxDataRenderer = function(url, plot, options) {
+          var ret = null;
+          $.ajax({
+            // have to use synchronous here, else the function
+            // will return before the data is fetched
+            async: false,
+            url: url,
+            dataType:"json",
+            success: function(data) {
+                //var array = $.map(data, function(value, index) {
+                    //return [value];
+                    //});
+              ret = [[["09:00", 5], ["09:30", 5], ["10:00", 5], ["10:30", 5], ["11:00", 10], ["11:30", 10], ["12:00", 10], ["12:30", 10], ["13:00", 5]]];
+              alert("OUT: " + ret);
+              console.log(ret);
+            },
+            error: function (request, status, error){ console.log("hate u forever!"); }
+          });
+          return ret;
+        };
+      
+      
+        // The url for our json data
+         var jsonurl = "/stat";
+         var plot1 = $.jqplot('chartdiv', jsonurl, {
+                                 title: "Numer of Users per Month",
+                                 dataRenderer: ajaxDataRenderer,
+                                 dataRendererOptions: {
+                                     unusedOptionalUrl: jsonurl
+                                 },
+                                 axes:{
+                                     xaxis:{
+                                         label:"Month",
+                                         renderer: $.jqplot.DateAxisRenderer,
+                                         tickOptions:{formatString:'%H:%M'}
+                                     }
+                                 }
+                             });
+         
+      });
+  
 
   $('#screens-pagination-control').bootstrapPaginator(pagOptScreens);
 

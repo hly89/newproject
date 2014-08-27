@@ -321,6 +321,13 @@ def ajax_rora_screens(request, gid):
     response_data = rora.getScreenGroupContent(groupID=gid)
 
     return HttpResponse(simplejson.dumps(response_data), mimetype='application/json')
+    
+def ajax_user_stat(request):
+    response_data = {}
+    response_data['result'] = [["Aug", 1], ["Sep", 2],["Oct", 3], ["Noe", 4]]
+    #response_data['message'] = ["Aug", "Sep", "Oct", "Nov"]
+    print(response_data)
+    return HttpResponse(simplejson.dumps(response_data), mimetype='application/json')
 
 def reports_search(request):
     query_string = ''
