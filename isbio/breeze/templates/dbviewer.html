@@ -1,0 +1,671 @@
+{% extends "base.html" %}
+
+{% load bootstrap_toolkit %}
+
+{% block title %}DB Viewer{% endblock %}
+
+{% block extra_head %}
+
+  <!--
+  <script type="text/javascript" src="/static/js/jquery.dataTables.min.js"></script>
+  <script type="text/javascript" src="/static/js/DT_bootstrap.js"></script>
+  <link rel="stylesheet" href="/static/css/DT_bootstrap.css" type="text/css"/>
+  -->
+  <link rel="stylesheet" href="/static/css/jquery.dataTables.min.css" type="text/css"/>
+  <link rel="stylesheet" href="/static/css/dataTables.tableTools.min.css" type="text/css"/>
+  <link rel="stylesheet" href="/static/css/dataTables.editor.min.css" type="text/css"/>
+
+
+  <script type="text/javascript" src="/static/js/jquery.dataTables.min.js"></script>
+  <script type="text/javascript" src="/static/js/dataTables.tableTools.min.js"></script>
+  <script type="text/javascript" src="/static/js/dataTables.editor.js"></script>
+  <!-- <script type="text/javascript" src="/static/js/dataTables.editor.min.js"></script> -->
+
+  <script type="text/javascript" src="/static/js/bootstrap-multiselect.js"></script>
+  <link rel="stylesheet" href="/static/css/bootstrap-multiselect.css" type="text/css"/>
+
+  <style>
+
+  div.DTE { overflow: visible; }
+  div.DTE_Body { overflow-y: visible; height: 270px; }
+  div.DTE_Body_Content { overflow-y: visible; height: 270px; }
+  div.DTE_Footer { overflow: visible; }
+  </style>
+{% endblock %}
+
+{% block content %}
+<div class="row-fluid">
+  &nbsp;
+</div>
+
+<!-- DB Modules -->
+<div class="row-fluid">
+  <div class="span10 offset1">
+    <ul class="nav nav-pills" id="scriptTabs">
+      <li class="active"><a href="#patientsOuter" data-toggle="tab"><strong>Patients &amp; Screens</strong></a></li>
+      <li ><a href="#drugsOuter" data-toggle="tab"><strong>Drug Collection</strong></a></li>
+    </ul>
+  </div>
+</div>
+
+<div class="row-fluid">
+  <div class="span10 offset1">
+    <!-- Outer tab content-->
+    <div class="tab-content">
+
+      <!-- Patients-Screens Outer Section -->
+      <div class="tab-pane active" id="patientsOuter">
+        <!-- Inner Tab Headers: -->
+        <ul class="nav nav-tabs" id="tabHeaders">
+          <li class="active"><a href="#patientsPane" data-toggle="tab">Patients</a></li>
+          <li><a href="#screensPane" data-toggle="tab">Screens</a></li>
+          <li><a href="#samplesPane" data-toggle="tab">Samples</a></li>
+          <li><a href="#sampleGroupsPane" data-toggle="tab">Screen Groups</a></li>
+          <li><a href="#ScreenInGroupPane" data-toggle="tab">Screen Groups Content</a></li>
+        </ul>
+
+        <!-- Tab Content: -->
+        <div class="tab-content">
+          <div class="tab-pane active" id="patientsPane">
+            <div class="well">
+              <p></p>
+                <!-- Patients Table -->
+                <table class="table table-hover table-bordered roraTable display" id="patients_table" data-editor="patientEditor" data-subject="patient" cellspacing="0" width="100%">
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>IDENTIFIER</th>
+                      <th>SOURCE</th>
+                      <th>DESCRIPTION</th>
+                      <th>ORGANIZM</th>
+                      <th>SEX</th>
+                      <th>BIRTHDATE</th>
+                    </tr>
+                  </thead>
+
+                  <tfoot>
+                    <tr>
+                      <th>ID</th>
+                      <th>IDENTIFIER</th>
+                      <th>SOURCE</th>
+                      <th>DESCRIPTION</th>
+                      <th>ORGANIZM</th>
+                      <th>SEX</th>
+                      <th>BIRTHDATE</th>
+                    </tr>
+                  </tfoot>
+
+                </table>
+                <!-- END OF Patients Table -->
+            </div>
+          </div>
+          <div class="tab-pane" id="screensPane">
+            <div class="well">
+              <p></p>
+                <!-- Screen Table -->
+                <table class="table table-hover table-bordered roraTable display" id="screen_table" data-editor="screenEditor" data-subject="screen" cellspacing="0" width="100%">
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>IDENTIFIER</th>
+                      <th>DESCRIPTION</th>
+                      <th>SOURCE</th>
+                      <th>PATIENT</th>
+                      <th>BREEZE_ALIAS</th>
+                      <th>TIME_STAMP</th>
+                    </tr>
+                  </thead>
+
+                  <tfoot>
+                    <tr>
+                      <th>ID</th>
+                      <th>IDENTIFIER</th>
+                      <th>DESCRIPTION</th>
+                      <th>SOURCE</th>
+                      <th>PATIENT</th>
+                      <th>BREEZE_ALIAS</th>
+                      <th>TIME_STAMP</th>
+                    </tr>
+                  </tfoot>
+
+                </table>
+                <!-- END OF Screen Table -->
+            </div>
+          </div>
+          <div class="tab-pane" id="samplesPane">
+            <div class="well">
+              <p></p>
+                <!-- Sample Table -->
+                <table class="table table-hover table-bordered roraTable display" id="sample_table" data-editor="sampleEditor" data-subject="sample" cellspacing="0" width="100%">
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>IDENTIFIER</th>
+                      <th>DESCRIPTION</th>
+                      <th>SCREEN</th>
+                      <th>DOSAGE</th>
+                    </tr>
+                  </thead>
+
+                  <tfoot>
+                    <tr>
+                      <th>ID</th>
+                      <th>IDENTIFIER</th>
+                      <th>DESCRIPTION</th>
+                      <th>SCREEN</th>
+                      <th>DOSAGE</th>
+                    </tr>
+                  </tfoot>
+
+                </table>
+                <!-- END OF Sample Table -->
+            </div>
+          </div>
+          <div class="tab-pane" id="sampleGroupsPane">
+            <div class="well">
+              <p></p>
+              <!-- ScreenGrops Table -->
+                <table class="table table-hover table-bordered roraTable display" id="screenGroup_table" data-editor="groupEditor" data-subject="group" cellspacing="0" width="100%">
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>USERNAME</th>
+                      <th>GROUPNAME</th>
+                    </tr>
+                  </thead>
+
+                  <tfoot>
+                    <tr>
+                      <th>ID</th>
+                      <th>USERNAME</th>
+                      <th>GROUPNAME</th>
+                    </tr>
+                  </tfoot>
+
+                </table>
+                <!-- END OF ScreenGrops Table -->
+            </div>
+          </div>
+          <div class="tab-pane" id="ScreenInGroupPane">
+            <div class="well">
+              <p></p>
+              <!-- ScreenGrops Table -->
+                <table class="table table-hover table-bordered roraTable display" id="screenInGroup_table" data-editor="groupEditor" data-subject="content" cellspacing="0" width="100%">
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>SCREENNAME</th>
+                      <th>GROUPNAME</th>
+                      <th>DOTMATICS ID</th>
+                    </tr>
+                  </thead>
+
+                  <tfoot>
+                    <tr>
+                      <th>ID</th>
+                      <th>SCREENNAME</th>
+                      <th>GROUPNAME</th>
+                      <th>DOTMATICS ID</th>
+                    </tr>
+                  </tfoot>
+
+                </table>
+                <!-- END OF ScreenInGrop Table -->
+            </div>
+          </div>
+        </div>    <!-- END OF INNER Tab Content: -->
+      </div>
+
+      <!-- Drug Annotations Outer Section -->
+      <div class="tab-pane" id="drugsOuter">
+        <!-- Inner Tab Headers: -->
+        <ul class="nav nav-tabs" id="tabHeaders">
+          <li class="active"><a href="#patientsPane" data-toggle="tab">Compounds</a></li>
+        </ul>
+
+        <!-- Tab Content: -->
+        <div class="tab-content">
+          <div class="tab-pane active" id="Drugs">
+            <div class="well">
+              <p></p>
+                <!-- Compounds Table -->
+                <table class="table table-hover table-bordered roraTable display" id="compounds_table" data-editor="patientEditor" data-subject="compound" cellspacing="0" width="100%">
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>FIMM ID</th>
+                      <th>SUPPLIER</th>
+                      <th>NAME</th>
+                      <th>FIMM PRODUCT</th>
+                    </tr>
+                  </thead>
+
+                  <tfoot>
+                    <tr>
+                      <th>ID</th>
+                      <th>FIMM ID</th>
+                      <th>SUPPLIER</th>
+                      <th>NAME</th>
+                      <th>FIMM PRODUCT</th>
+                    </tr>
+                  </tfoot>
+
+                </table>
+                <!-- END OF Patients Table -->
+            </div>
+          </div>
+        </div>    <!-- END OF INNER Tab Content: -->
+      </div>
+
+    </div>    <!-- END OF OUTER Tab Content: -->
+  </div>
+</div>
+
+<script>
+
+$(document).ready(function() {
+  // using jQuery
+  function getCookie(name) {
+      var cookieValue = null;
+      if (document.cookie && document.cookie != '') {
+          var cookies = document.cookie.split(';');
+          for (var i = 0; i < cookies.length; i++) {
+              var cookie = jQuery.trim(cookies[i]);
+              // Does this cookie string begin with the name we want?
+              if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                  cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                  break;
+              }
+          }
+      }
+      return cookieValue;
+  }
+  var csrftoken = getCookie('csrftoken');
+  var username = "{{ user.username|default:"undefined" }}"
+
+  // --- OUR CUSTOM FILED TYPE ---
+  // ----------------------------
+  $.fn.dataTable.Editor.fieldTypes.multidrop = $.extend( true, {}, $.fn.dataTable.Editor.models.fieldType, {
+    "create": function ( conf ) {
+        var that = this;
+
+        conf._enabled = true;
+
+        // Create the elements to use for the input
+        conf._input = $(
+            '<div>'+
+                '<select id="group_editor_list" class="multiselect" multiple="multiple">'+
+                '<option value="cheese">Cheese</option>'+
+                '<option value="tomatoes">Tomatoes</option>'+
+                '<option value="mozarella">Mozzarella</option>'+
+                '</select>'+
+            '</div>')[0];
+
+        // Use the fact that we are called in the Editor instance's scope to call
+        // the API method for setting the value when needed
+        $('button.inputButton', conf._input).click( function () {
+            if ( ! conf._enabled ) {
+                that.set( conf.name, $(this).attr('value') );
+            }
+
+            return false;
+        } );
+
+        return conf._input;
+    },
+
+    "get": function ( conf ) {
+        return $('button.selected', conf._input).attr('value');
+    },
+
+    "set": function ( conf, val ) {
+        $('button.selected', conf._input).removeClass( 'selected' );
+        $('button.inputButton[value='+val+']', conf._input).addClass('selected');
+    }
+} );
+
+  // --- SCREEN IN GROUP Set Up       ---
+  // ----------------------------
+  contentCreator = new $.fn.dataTable.Editor( {
+        ajax: "/ajax-rora/action/",
+        table: "#screenInGroup_table",
+        "fields": [ {
+                "label": "Group Name",
+                "name": "group_name"
+            }
+        ]
+    } );
+
+  contentCreator.on( 'preSubmit', function ( e, data, action ) {
+                data.csrfmiddlewaretoken = csrftoken;
+                data.group_author = username;
+                data.table = 'content';
+        } );
+
+  $('#screenInGroup_table').DataTable( {
+    dom: "Tlfrtip",
+    retrieve: true,
+    //"bDestroy": true,
+    ajax: {
+      url: "/ajax-rora-patients/" + $('#screenInGroup_table').data('subject'),
+      type: "GET"
+    },
+    serverSide: true,
+    columns: [
+            { data: "PK_SCREEN_IN_GROUP_ID" },
+            { data: "IDENTIFIER" },
+            { data: "SCREEN_GROUP_NAME" },
+            { data: "DOTM_SOURCE_ID" }
+        ],
+    tableTools: {
+        sRowSelect: "multi",
+        aButtons: [
+            { sExtends: "editor_remove", editor: contentCreator }
+        ]
+    }
+  } );  // #sample_table
+
+  // --- SCREEN GROUPS Set Up ---
+  // ----------------------------
+  groupCreator = new $.fn.dataTable.Editor( {
+        ajax: "/ajax-rora/action/",
+        table: "#screenGroup_table",
+        "fields": [ {
+                "label": "Group Name",
+                "name": "group_name"
+            }
+        ]
+    } );
+
+  groupCreator.on( 'preSubmit', function ( e, data, action ) {
+                data.csrfmiddlewaretoken = csrftoken;
+                data.group_author = username;
+                data.table = 'groups';
+        } );
+
+  groupEditor = new $.fn.dataTable.Editor( {
+        ajax: "/ajax-rora/action/",
+        table: "#screenGroup_table",
+        "fields": [ {
+                "label": "Group content:",
+                "name": "Content",
+                "type": "multidrop"
+            }
+        ]
+    } );
+
+  // initialize Multiselect plugin
+  var multiConfigurationSet = {
+    includeSelectAllOption: true,
+    enableFiltering: true,
+    maxHeight: 205
+  };
+
+
+  groupEditor.on( 'preSubmit', function ( e, data, action ) {
+                data.csrfmiddlewaretoken = csrftoken;
+                data.group_author = username;
+                data.table = 'groups';
+        } );
+
+  var screenGroupTable = $('#screenGroup_table').DataTable( {
+    dom: "Tlfrtip",
+    retrieve: true,
+    //"bDestroy": true,
+    ajax: {
+      url: "/ajax-rora-patients/" + $('#screenGroup_table').data('subject'),
+      type: "GET"
+    },
+    serverSide: true,
+    columns: [
+            { data: "PK_SCREEN_GROUP_ID" },
+            { data: "FIMM_USERNAME" },
+            { data: "SCREEN_GROUP_NAME" }
+        ],
+    tableTools: {
+        sRowSelect: "multi",
+        aButtons: [
+            { sExtends: "editor_create", editor: groupCreator },
+            //{ sExtends: "editor_edit",   editor: groupEditor },
+            { sExtends: "editor_remove", editor: groupCreator },
+            {
+              sExtends: 'select_single',
+              sButtonClass: 'marginLeft',
+              sButtonText: 'Alter group content',
+              fnClick: function () {
+                        if ( screenGroupTable.row( '.selected' ).length !== 0 ) {
+                            var opts = '';
+
+                            // Show the salary submit form
+                            groupEditor
+                                .title( 'Choose required screens...' )
+                                .buttons( { label: 'Save', fn: function() {
+                                  var control= $(this.dom.form).find('.multiselect-container li[class=active]').find('input');
+
+                                  var content = [];
+                                  $(control).each(function(){
+                                    var id = this.value
+                                    if ( id != 'multiselect-all') { content.push( id ); }
+                                  });
+
+                                  this.submit( null, null, function (data) {
+                                    data.screens = content;
+                                    data.table = 'groups';
+                                  });
+
+                                } } )
+                                .edit( screenGroupTable.row( '.selected' ).node() );
+
+                            // Clean up option content if any
+                            $('#group_editor_list option').remove();
+
+                            // Get group ID
+                            var rowID = screenGroupTable.row( '.selected' ).node().id;
+                            groupID = rowID.slice(4);   // trim 'row_' from rowID
+
+                            // Obtain <option />s for this group
+                            $.getJSON('/ajax-rora-plain-screens/' + groupID, function( data ){
+                                $.each( data, function( key, val ) {
+                                  if (val.selected) {
+                                    opts += '<option value="' + key + '" selected="selected">' + val.name + '</option>';
+                                  }
+                                  else {
+                                    opts += '<option value="' + key + '">' + val.name + '</option>';
+                                  }
+                                });
+
+                                $('#group_editor_list').append(opts);
+
+                                // Initialize multiselect plugin
+                                $('.multiselect').multiselect(multiConfigurationSet);
+                            });
+                        }
+                    } // function()
+            }
+        ]
+    }
+  } );  // #screenGroup_table
+
+  // --- SAMPLES Set Up       ---
+  // ----------------------------
+  $('#sample_table').DataTable( {
+    dom: "lfrtip",
+    retrieve: true,
+    //"bDestroy": true,
+    ajax: {
+      url: "/ajax-rora-patients/" + $('#sample_table').data('subject'),
+      type: "GET"
+    },
+    serverSide: true,
+    columns: [
+            { data: "PK_SCREEN_SAMPLE_ID" },
+            { data: "IDENTIFIER" },
+            { data: "DESCRIPTION" },
+            { data: "SCREEN_ID" },
+            { data: "ORDER_NO" }
+        ]
+  } );  // #sample_table
+
+  // --- SCREENS Set Up       ---
+  // ----------------------------
+  screenCreator = new $.fn.dataTable.Editor( {
+        ajax: "/ajax-rora/action/",
+        table: "#screen_table",
+        "fields": [ {
+                "label": "Group Name",
+                "name": "group_name"
+            }
+        ]
+    } );
+
+  screenCreator.on( 'preSubmit', function ( e, data, action ) {
+                data.csrfmiddlewaretoken = csrftoken;
+                data.group_author = username;
+                data.table = 'screen';
+        } );
+
+  var screenTable = $('#screen_table').DataTable( {
+    dom: "Tlfrtip",
+    retrieve: true,
+    //"bDestroy": true,
+    ajax: {
+      url: "/ajax-rora-patients/" + $('#screen_table').data('subject'),
+      type: "GET"
+    },
+    serverSide: true,
+    columns: [
+            { data: "PK_SCREEN_ID" },
+            { data: "IDENTIFIER" },
+            { data: "DESCRIPTION" },
+            { data: "SOURCE_IDENTIFIER" },
+            { data: "ENTITY_ID" },
+            { data: "BREEZE_ALIAS" },
+            { data: "TIME_STAMP" }
+        ],
+    tableTools: {
+        sRowSelect: "multi",
+        aButtons: [
+            { sExtends: "editor_remove", editor: screenCreator },
+            {
+              sExtends: 'select_single',
+              sButtonText: 'Generate Report',
+              fnClick: function() {
+                if ( screenTable.row('.selected').length !== 0 ){
+                  var iid = screenTable.row('.selected').node().id
+                  requestStr = '/reports/overview/ScreenReport-__Screen__' + iid.substring(4) + '-' + iid.substring(4)
+                  window.location.replace(requestStr);
+                }
+              }
+            }
+        ]
+    }
+  } );  // #screen_table
+
+
+  // --- PATIENTS Set Up ---
+  // ----------------------------
+  patientEditor = new $.fn.dataTable.Editor( {
+        ajax: "/ajax-rora/action/",
+        table: "#patient_table",
+        //idSrc: "id",
+        "fields": [
+            { "label": "Identifier:",   "name": "IDENTIFIER",         "type": "text", "attr": { "required": true } },
+            { "label": "Source:",       "name": "SOURCE_IDENTIFIER",  "type": "text", "def": "FIMM" },
+            { "label": "Description:",  "name": "DESCRIPTION",        "type": "textarea" },
+            { "label": "Organism:",     "name": "ORGANISM_ID",        "type": "select" },
+            { "label": "Sex:",          "name": "SEX_ID",             "type": "select" },
+            { "label": "Birth date:",   "name": "BIRTHDATE",          "type": "date",  "dateFormat": "yy-mm-dd", "opts": { "changeMonth": true, "changeYear": true }  }
+        ]
+    } );
+
+  // Set field options:
+  patientEditor.field('ORGANISM_ID').update( [ 'Homosapiens', 'Mouse'  ] );
+  patientEditor.field('SEX_ID').update( [ 'Male', 'Female'  ] );
+
+  // Supply additional parameters before Submit:
+  patientEditor.on( 'preSubmit', function ( e, data, action ) {
+                data.csrfmiddlewaretoken = csrftoken;
+                data.group_author = username;
+                data.table = 'patients';
+        } );
+
+  var patientTable = $('#patients_table').DataTable( {
+    dom: "Tlfrtip",
+    retrieve: true,
+    //"bDestroy": true,
+    ajax: {
+      url: "/ajax-rora-patients/" + $('#patients_table').data('subject'),
+      type: "GET"
+    },
+    serverSide: true,
+    columns: [
+            { data: "PK_ENTITY_ID" },
+            { data: "IDENTIFIER" },
+            { data: "SOURCE_IDENTIFIER" },
+            { data: "DESCRIPTION" },
+            { data: "ORGANISM_ID" },
+            { data: "SEX_ID" },
+            { data: "BIRTHDATE" }
+        ],
+    tableTools: {
+        sRowSelect: "multi",
+        aButtons: [
+            { sExtends: "editor_create", editor: patientEditor },
+            { sExtends: "editor_edit",   editor: patientEditor },
+            { sExtends: "editor_remove", editor: patientEditor },
+            {
+              sExtends: 'select_single',
+              sButtonText: 'Generate Report',
+              fnClick: function() {
+                if ( patientTable.row('.selected').length !== 0 ){
+                  var iid = patientTable.row('.selected').node().id
+                  requestStr = '/reports/overview/PatientReport-__Patient__' + iid.substring(4) + '-' + iid.substring(4)
+                  window.location.replace(requestStr);
+                }
+              }
+            }
+        ]
+    }
+  } );  // #patients_table
+
+  // --- Compuonds Set Up       ---
+  // ----------------------------
+  var compoundTable = $('#compounds_table').DataTable( {
+    dom: "Tlfrtip",
+    retrieve: true,
+    //"bDestroy": true,
+    ajax: {
+      url: "/ajax-rora-patients/" + $('#compounds_table').data('subject'),
+      type: "GET"
+    },
+    serverSide: true,
+    columns: [
+            { data: "PK_PRODUCT_NAME_ID" },
+            { data: "DRUG_NOTATION_ID" },
+            { data: "SUPPLIER_ID" },
+            { data: "DESCRIPTION" },
+            { data: "FIMM_PRODUCT_ID" }
+        ],
+        tableTools: {
+          sRowSelect: "multi",
+          aButtons: [
+            {
+              sExtends: 'select_single',
+              sButtonText: 'Generate Report',
+              fnClick: function() {
+                if ( compoundTable.row('.selected').length !== 0 ){
+                  var iid = compoundTable.row('.selected').node().id
+                  requestStr = '/reports/overview/DrugReport-__Drug__' + iid.substring(4) + '-' + iid.substring(4)
+                  window.location.replace(requestStr);
+                }
+              }
+            }
+          ]
+        }
+  } );  // #compounds_table
+
+
+});
+</script>
+
+{% endblock %}

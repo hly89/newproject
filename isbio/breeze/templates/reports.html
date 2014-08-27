@@ -1,0 +1,222 @@
+{% extends "base.html" %}
+
+{% load bootstrap_toolkit %}
+
+{% block title %}Reports{% endblock %}
+
+{% block extra_head %}
+
+  <link href="/static/css/bootstrapSwitch.css" rel="stylesheet">
+  <script src="/static/js/bootstrapSwitch.js"></script>
+  <script type="text/javascript" src="/static/js/bootstrap-paginator.min.js"></script>
+
+<style>
+#main_table td {text-align:center; vertical-align:middle;}
+#main_table th {text-align:center; vertical-align:middle;}
+.popover .left {
+    max-width: 1050px;
+    width: auto;
+}
+</style>
+
+{% endblock %}
+
+{% block content %}
+
+
+  <!-- SIMPLE SEARCH FIELD -->
+  <div class="row-fluid">
+    <p><br>&nbsp;<br></p>
+    <div class="span8 offset2">
+      <form class="navbar-search pull-right" action="#" method="post">
+        {% csrf_token %}
+        <input name="query" type="text" class="search-query" placeholder="Quick Search... " value="{{ search_query }}" disabled>
+      </form>
+    </div>
+  </div>
+
+  <!-- FILTER & CREATE BUTTONS ROW -->
+  <div class="row-fluid">
+    <div class="span10 offset1">
+      <p><br>&nbsp;<br></p>
+      <a href="#" id="new_popover" class="btn btn-primary input-medium pull-left" rel="popover">
+        <strong><i class="icon-plus icon-white"></i> &nbsp;New Report </strong>
+      </a>
+      <a href="#" id="filter_popover" class="btn btn-primary input-medium pull-right" data-toggle="collapse" data-target="#demo">
+        <strong><i class="icon-filter icon-white"></i> &nbsp;Filters </strong>
+      </a>
+    </div>
+  </div>
+
+  <!-- FILTERS Collapse -->
+  <div class="row-fluid">
+    <div class="span8 offset4">
+      <p><br>&nbsp;<br></p>
+      <div id="demo" class="collapse in">
+        <form id="filter_form" class="form-inline" action="/reports/search" method="post">
+          {% csrf_token %}
+          <select id="filt_type" name="filt_type" class="input-medium" >
+            <option id="" value="All Types" >All Types</option>
+            {% for item in rtypes %}
+              <option id="{{ item.id }}" value="{{ item.type }}" >{{ item.type }}</option>
+            {% endfor %}
+          </select>
+          <input id="filt_name" name="filt_name" type="text" class="input" placeholder="Report Name">
+
+          <button type="submit" class="btn">Search</button>
+          <button id="filt_clean" class="btn" type="reset">Clean</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- LIST OF EXISTING REPORTS -->
+  <div class="row-fluid">
+    <div class="span10 offset1">
+      <p><br>&nbsp;<br></p>
+      <table class="table table-striped table-hover" id="main_table">
+        {% if reports %}
+        <thead>
+          <tr>
+            <th>Date</th> <th>Report Type</th> <th>Report Name</th> <th>Author</th> <th>Project</th> <th></th><th></th>
+          </tr>
+        </thead>
+        {% endif %}
+        <tbody id="pagination-content">
+          {% include "reports-paginator.html" %}
+        </tbody>
+      </table>
+      <p><br>&nbsp;<br></p>
+      <div id="paginator_control"></div>
+    </div>
+  </div>
+
+  <div id="Del" class="modal hide fade" role="dialog"  aria-hidden="true">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+        <h3 id="del_title">Delete JOB</h3>
+      </div>
+      <div class="modal-body">
+        <p> Are you sure you DO NOT need this report any more?! </p>
+      </div>
+      <div class="modal-footer">
+        <a id="del_btn" href="#" class="btn btn-danger" > Delete </a>
+        <a href="#" class="btn btn-inverse" data-dismiss="modal" aria-hidden="true">Close</a>
+      </div>
+  </div>
+
+<script>
+$(document).ready(function() {
+  // paginator setup
+  var pagOptions = {
+    currentPage: 1,
+    numberOfPages:5,
+    totalPages: "{{ pagination_number }}",
+    alignment:'center',
+    onPageChanged: function(e,oldPage,newPage){
+      //console.log( $('#pagination-test').load('/reports/ #pagination_context', "Page:" + newPage ) );
+      $.get("/reports/", { page: newPage }, function(data){
+        $('#pagination-content').html(data);
+      });
+    }
+  }
+
+  $('#paginator_control').bootstrapPaginator(pagOptions);
+
+  $('.Glyph').tooltip()
+
+  $('#new_popover').popover({
+    title: "New Report Query",
+    trigger: "click",
+    placement: "right",
+    html: true,
+    content: '\
+    <form class="navbar-search" action="/search/entity" method="post">\
+    <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}"/>\
+      <div class="control-group">\
+        <div class="controls">\
+          <select id="type_selector" name="type" class="input-medium search-query">\
+          {% for item in rtypes %}\
+            <option id="{{ item.id }}" value="{{ item.type }}" data-search={{ item.search }}>{{ item.type }}</option>\
+          {% endfor %}\
+          </select>\
+        </div>\
+      </div>\
+      <div class="control-group">\
+        <div class="controls">\
+          <input id="popover_search" name="query" type="text" class="search-query input-medium" placeholder="Item Search... " value=""></br>\
+        </div>\
+      </div>\
+      <div class="control-group">\
+        <div class="controls">\
+          <button type="submit" class="btn btn-primary btn-small btn-block"><strong> GO </strong></button>\
+        </div>\
+      </div>\
+    </form>\
+    </br>\
+    '
+  });
+
+  /*$('#filter_popover').popover({
+    title: "Reports Filtering",
+    trigger: "click",
+    placement: "left",
+    html: true,
+    content: '\
+    <form class="form-inline" action="/reports/search" method="post">\
+      <div class="control-group">\
+      <p>Coming soon..</p>\
+      </div>\
+    </form>\
+    </br>\
+    '
+  });*/
+
+  $('#new_popover').click(function(){
+    $('#type_selector').change(function(){
+      if ($('#type_selector').find(':selected').data('search') == "True"){
+        $('#popover_search').attr('placeholder', 'Item Search... ');
+      }
+      else {
+        $('#popover_search').attr('placeholder', 'Report Name ');
+      }
+    });
+  });
+
+  // FILTERING: Submit filter form
+  $('#filter_form').submit(function(ev){
+    var formData = $(this).serialize();
+    $.ajax({
+      type: 'POST',
+      url: '/reports/search',
+      data: formData,
+      success: function(response, textStatus, jqXHR){
+        var options = {
+          currentPage: 1,
+          totalPages: 1
+        }
+
+        $('#paginator_control').bootstrapPaginator(options);
+
+        $("#pagination-content").html(response);
+      },
+      error: function (request, status, error){ console.log(error); },
+    });
+
+    return false;
+  });
+
+  // FILTERING: Clean filter form
+  $('#filt_clean').click(function(){
+    //$('#filter_form').reset();
+    $("#pagination-content").load('/reports/search', {
+      reset: 1,
+      csrfmiddlewaretoken: '{{ csrf_token }}'
+    });
+    $('#paginator_control').bootstrapPaginator(pagOptions);
+  });
+
+});
+</script>
+
+{% endblock %}

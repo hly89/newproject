@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+{% load bootstrap_toolkit %}
+<html lang="en"><head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <title>BREEZE · FIMM</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <!-- Le styles -->
+    <link href="/static/css/bootstrap.css" rel="stylesheet">
+    <link href="/static/css/bootstrap-responsive.css" rel="stylesheet">
+    <link href="/static/css/jquery-ui-1.9.2.custom.css" rel="stylesheet">
+    <script src="/static/js/bootstrap.js"></script>
+    <script src="/static/js/jquery.js"></script>
+    <script src="/static/js/jquery-1.8.3.min.js"></script>
+    <script src="/static/js/jquery-ui-1.9.2.custom.min.js"></script>
+    <script src="/static/js/jquery.ajaxfileupload.js"></script>
+    
+    {% bootstrap_javascript_tag "dropdown" %}
+    {% bootstrap_javascript_tag "modal" %}
+    {% bootstrap_javascript_tag "carousel" %}
+    {% bootstrap_javascript_tag "slide" %}
+    {% bootstrap_javascript_tag "carousel-iner" %}
+    {% bootstrap_javascript_tag "carousel-control" %}
+    {% bootstrap_javascript_tag "transition" %}
+    {% bootstrap_javascript_tag "popover" %}
+    
+    {% bootstrap_stylesheet_tag %}
+    <style>
+    
+    /* GLOBAL STYLES
+    -------------------------------------------------- */
+    /* Padding below the footer and lighter body text */
+
+    
+    body {
+      padding-top: 40px; 
+      background-color: #eee;
+      
+      color: #5a5a5a;
+      
+    }
+    
+    .help-block {display:none;}
+      
+    /* CUSTOMIZE THE NAVBAR
+    -------------------------------------------------- */
+
+    /* Special class on .container surrounding .navbar, used for positioning it into place. */
+    .navbar-wrapper {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 10;
+      margin-top: 20px;
+      margin-bottom: -90px; /* Negative margin to pull up carousel. 90px is roughly margins and height of navbar. */
+    }
+    .navbar-wrapper .navbar {
+
+    }
+
+    /* Remove border and change up box shadow for more contrast */
+    .navbar .navbar-inner {
+      border: 0;
+      -webkit-box-shadow: 0 2px 10px rgba(0,0,0,.25);
+         -moz-box-shadow: 0 2px 10px rgba(0,0,0,.25);
+              box-shadow: 0 2px 10px rgba(0,0,0,.25);
+    }
+
+    /* Downsize the brand/project name a bit */
+    .navbar .brand {
+      padding: 14px 20px 16px; /* Increase vertical padding to match navbar links */
+      font-size: 16px;
+      font-weight: bold;
+      text-shadow: 0 -1px 0 rgba(0,0,0,.5);
+    }
+
+    /* Navbar links: increase padding for taller navbar */
+    .navbar .nav > li > a {
+      padding: 15px 20px;
+    }
+
+    /* Offset the responsive button for proper vertical alignment */
+    .navbar .btn-navbar {
+      margin-top: 10px;
+    }
+
+
+
+    /* CUSTOMIZE THE NAVBAR
+    -------------------------------------------------- */
+
+    /* Carousel base class */
+    .carousel {
+      margin-bottom: 60px;
+    }
+
+    .carousel .container {
+      position: relative;
+      z-index: 10;
+    }
+
+    .carousel-control {
+      height: 80px;
+      margin-top: 0;
+      font-size: 120px;
+      text-shadow: 0 1px 1px rgba(0,0,0,.4);
+      background-color: transparent;
+      border: 0;
+    }
+
+    .carousel .item {
+      height: 500px;
+    }
+    .carousel img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      min-width: 100%;
+      height: 500px;
+    }
+
+    .carousel-caption {
+      background-color: transparent;
+      position: static;
+      max-width: 550px;
+      padding: 0 20px;
+      margin-top: 200px;
+    }
+    .carousel-caption h1,
+    .carousel-caption .lead {
+      margin: 0;
+      line-height: 1.25;
+      color: #fff;
+      text-shadow: 0 1px 1px rgba(0,0,0,.4);
+    }
+    .carousel-caption .btn {
+      margin-top: 10px;
+    }
+
+
+
+    /* RESPONSIVE CSS
+    -------------------------------------------------- */
+
+    @media (max-width: 979px) {
+
+      .container.navbar-wrapper {
+        margin-bottom: 0;
+        width: auto;
+      }
+      .navbar-inner {
+        border-radius: 0;
+        margin: -20px 0;
+      }
+
+      .carousel .item {
+        height: 500px;
+      }
+      .carousel img {
+        width: auto;
+        height: 500px;
+      }
+
+      .featurette {
+        height: auto;
+        padding: 0;
+      }
+      .featurette-image.pull-left,
+      .featurette-image.pull-right {
+        display: block;
+        float: none;
+        max-width: 40%;
+        margin: 0 auto 20px;
+      }
+    }
+
+
+    @media (max-width: 767px) {
+
+      .navbar-inner {
+        margin: -20px;
+      }
+
+      .carousel {
+        margin-left: -20px;
+        margin-right: -20px;
+      }
+      .carousel .container {
+
+      }
+      .carousel .item {
+        height: 300px;
+      }
+      .carousel img {
+        height: 300px;
+      }
+      .carousel-caption {
+        width: 65%;
+        padding: 0 70px;
+        margin-top: 100px;
+      }
+      .carousel-caption h1 {
+        font-size: 30px;
+      }
+      .carousel-caption .lead,
+      .carousel-caption .btn {
+        font-size: 18px;
+      }
+
+      .marketing .span4 + .span4 {
+        margin-top: 40px;
+      }
+
+      .featurette-heading {
+        font-size: 30px;
+      }
+      .featurette .lead {
+        font-size: 18px;
+        line-height: 1.5;
+      }
+
+    }
+    </style>
+  </head>
+
+  <body>
+
+    <!-- NAVBAR
+    ================================================== -->
+    <div class="navbar navbar-inverse navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container-fluid">
+          <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </a>
+          <a class="brand" href="/breeze">BREEZE</a>
+          <div class="nav-collapse collapse">
+            <ul class="nav">
+              {% if user.is_authenticated %}
+                <li><a href="/home">Home</a></li>
+              {% endif %}
+              <li><a href="http://www.fimm.fi/en/fimm/">About</a></li>
+              <li><a href="http://www.fimm.fi/en/fimm/contacts/">Contact</a></li>
+            </ul>
+          </div><!--/.nav-collapse -->
+          {% if user.is_authenticated %}
+            <div class="btn-group pull-right">
+              <a class="btn btn-inverse dropdown-toggle" data-toggle="dropdown" href="#"> 
+                <i class="icon-user icon-white"></i>  {{ user.username }}  <span class="caret" />
+              </a>
+              <ul class="dropdown-menu">
+                <li><a href="/logout/"> Log Out <i class="icon-share"></i></a></li>
+              </ul>
+            </div>
+          {% else %}
+            <a class="btn btn-inverse pull-right" href="/home/"> <strong>LogIn</strong> </a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+
+
+    <!-- Carousel
+    ================================================== -->
+    <div id="myCarousel" class="carousel slide" >
+      <div class="carousel-inner">
+        <div class="item">
+          <img src="/static/img/fimm2.jpg" alt="">
+          <div class="container">
+            <div class="carousel-caption">
+              <h1>Contact Us</h1>
+              <p class="lead">Postal address: <br> P.O. Box 20, FI-00014 University of Helsinki, Finland <br>
+		Street address: <br> Biomedicum 2U, Tukholmankatu 8, 00290 Helsinki</p>
+              <a class="btn btn-large btn-primary" href="#">Contact</a>
+            </div>
+          </div>
+        </div>
+        <div class="item active">
+          <img src="/static/img/fimm1.jpg" alt="">
+          <div class="container">
+            <div class="carousel-caption">
+              <h1>About FIMM</h1>
+              <p class="lead">The mission of the Institute is to advance new fundamental understanding of the molecular, cellular and etiological basis of human diseases. This understanding will lead to improved means of diagnostics and the treatment and prevention of common health problems.</p>
+              <a class="btn btn-large btn-primary" href="http://www.fimm.fi/en/fimm/">Learn more</a>
+            </div>
+          </div>
+        </div>
+        <div class="item">
+          <img src="/static/img/fimm3.jpg" alt="">
+          <div class="container">
+            <div class="carousel-caption">
+              <h1>BREEZE</h1>
+              <p class="lead">The main idea behind BREEZE project is to build a 24/7 communication bridge between biologists and bioinformatics resources.</p>
+              <a class="btn btn-large btn-primary" href="#">Explore</a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <a class="left carousel-control" href="#myCarousel" data-slide="prev">‹</a>
+      <a class="right carousel-control" href="#myCarousel" data-slide="next">›</a>
+    </div><!-- /.carousel -->
+
+    <hr>
+
+    <footer>
+      <div class="container">
+        <center><p>&middot; &copy; FIMM 2013 &middot;</p></center>
+      </div>
+    </footer>
+    
+  </div><!-- /.container -->
+
+<!-- Modals -->
+<div id="register" class="modal fade" role="dialog"  aria-hidden="true"></div>
+
+<script>
+      $(document).ready(function() {
+          modalConnect();
+      });
+      !function ($) {
+        $(function(){
+          $('#myCarousel').carousel()
+          $('#dropdown-toggle').dropdown();
+      $('#dropdown-menu').find('form').click(function (e) {
+        e.stopPropagation();
+      });
+
+        })
+      }(window.jQuery)
+</script>
+<script type="text/javascript">
+function submitItemModalFormBind(url){
+         $('#form_modal_register').submit(function(ev){
+             $.ajax({                
+                type: "POST",
+                url: url,
+                enctype: 'multipart/form-data',
+                data: $(this).serialize(),
+                success:function(response, textStatus, jqXHR){
+                    var form = $("#form_modal_register_div", response);
+                    //form is returned if it is not valid. update modal with returned form
+                    //change this "if" to check for a specific return code which should be set in the view
+                    if (form.html()) {
+                        $('#form_modal_register_div').html(form);
+                        $("#register").modal('show');
+                    }
+                    //form is not returned if form submission succeeded
+                    else{                          
+                        //update the entire document with the response received since we received a entire success page and we want to reload the entire page
+                        $('#form_modal_register_div').html(form);
+                        $("#register").modal('show');
+                    }
+                }, 
+                error: function (request, status, error) {
+                            //implement proper error handling
+                            console.log("failure");
+                            console.log(request.responseText);
+                    }
+                });
+                    return false;
+                });
+              }
+function modalConnect()
+        {
+            $(".reg").unbind('click');
+            //bind the click event
+            $(".reg").click(function(ev) {
+                ev.preventDefault();        
+                $.get("/register/", function(results){
+                  //update the dom with the received form
+                  $('#register').html(results);
+                  $("#register").modal('show');
+                  $(document).ready(function () {
+                     //bind the form to an ajax call. ajax call will be set to the received update url
+                     submitItemModalFormBind("/register/");
+                  });
+
+                }, "html");
+                return false; // prevent the click propagation
+            })
+        }
+</script>
+</body>
+</html>

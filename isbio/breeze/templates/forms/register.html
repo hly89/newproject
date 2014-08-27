@@ -1,0 +1,25 @@
+{% load bootstrap_toolkit %}
+<!-- Register Modal -->
+
+
+  <form id="form_modal_register" class="form-horizontal" action="/register/" method="post" enctype="multipart/form-data" >
+    <div id="form_modal_register_div">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+        <h3 id="myModalLabel">BREEZE User Registration</h3>
+      </div>
+      <div class="modal-body">
+        {% csrf_token %}
+        {% if form.username.errors %}
+          {{ form.username.html_error_list }}
+        {% endif %}
+        {{ form|as_bootstrap }}
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-inverse" type="submit">REGISTER</button>
+        <button class="btn btn-inverse" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </form>
+
+

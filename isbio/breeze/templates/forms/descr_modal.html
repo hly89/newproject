@@ -1,0 +1,26 @@
+{% load bootstrap_toolkit %}
+<!-- Description Modal -->
+
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+    <h3 id="myModalLabel">{{ scr.name }}</h3>
+  </div>
+  <div class="modal-body">
+    <blockquote>
+      <p class="text-info"><strong>Category: {{ scr.category|capfirst }}</strong></p>
+      <p class="text-info"><strong>Author: {{ scr.author }} - (email comes soon) </strong></p>
+      <p class="text-info"><i>{{ scr.inln }}</i></p>
+    </blockquote>
+    <p>&nbsp;</p>
+    <p>
+      <img style="float: left; margin: 15px 35px 15px 0" {% if scr.logo %} src="/media/{{ scr.logo }}" {% else %} src="/static/logos/rlogo.jpg" {% endif %} width="95" height="95" class="img-rounded leftimg">
+
+      {% autoescape off %}
+        {{ scr.details }}
+      {% endautoescape %}
+
+    </p>
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-inverse" data-dismiss="modal">Okay</button>
+  </div>

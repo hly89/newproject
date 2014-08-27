@@ -1,0 +1,55 @@
+
+R version 3.1.1 (2014-07-10) -- "Sock it to Me"
+Copyright (C) 2014 The R Foundation for Statistical Computing
+Platform: x86_64-apple-darwin13.1.0 (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> setwd("/Users/liye/Documents/breeze/db/reports/1_hello_hly89")
+> require( Nozzle.R1 )
+Loading required package: Nozzle.R1
+Warning message:
+In library(package, lib.loc = lib.loc, character.only = TRUE, logical.return = TRUE,  :
+  there is no package called ‘Nozzle.R1’
+> 
+> path <- "/Users/liye/Documents/breeze/db/reports/1_hello_hly89"
+> report_name <- "hello Report :: hello  <br>  hi"
+> failed_fun_print <- function(section_name){
++   section_name <- addTo( section_name, newParagraph( "This section FAILED! Contact the development team... " ) )
++   return (section_name)
++ }
+> 
+> # <----------  Project Details  ----------> 
+> report.author          <- "hly89"
+> report.pipeline        <- "hello"
+> project.name           <- "breeze"
+> project.manager        <- "olli"
+> project.pi             <- "olli"
+> project.author         <- "hly89"
+> project.collaborative  <- "False"
+> project.wbs            <- ""
+> project.external.id    <- ""
+> # <----------  end of Project Details  ----------> 
+> 
+> # <----------  Pipeline Config  ----------> 
+> query.key          <- "00000"  # id of queried RORA instance 
+> #          Configuration Module  
+> 
+> # <------- end of Pipeline Config --------> 
+> 
+> 
+> REPORT <- newCustomReport(report_name)
+Error: could not find function "newCustomReport"
+Execution halted
