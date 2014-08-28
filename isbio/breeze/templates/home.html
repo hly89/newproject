@@ -15,6 +15,9 @@
   <script type="text/javascript" src="/static/js/jquery.jqplot.min.js"></script>
   <script type="text/javascript" src="/static/plugins/jqplot.json2.min.js"></script>
   <script type="text/javascript" src="/static/plugins/jqplot.dateAxisRenderer.js"></script>
+  <script type="text/javascript" src="/static/plugins/jqplot.CanvasAxisTickRenderer.js"></script>
+  <script type="text/javascript" src="/static/plugins/jqplot.CanvasTextRenderer.min.js"></script>
+  
   
   <style>
     .thumbnails .span4:nth-child(3n+1) {
@@ -412,16 +415,23 @@
             url: url,
             dataType:"json",
             success: function(data) {
-                //var array = $.map(data, function(value, index) {
-                    //return [value];
-                    //});
-              ret = [[["09:00", 5], ["09:30", 5], ["10:00", 5], ["10:30", 5], ["11:00", 10], ["11:30", 10], ["12:00", 10], ["12:30", 10], ["13:00", 5]]];
-              alert("OUT: " + ret);
-              console.log(ret);
+              //var data = [["2013-08", 5], ["2014-08", 5]];
+              //ret = data
+              var jqPlotData = $.map(data, function (value, key) {
+                              if (key != "__type") {
+                                  return [value]; //was key, value
+                              }
+                          });
+              
+              ret = jQuery.makeArray(jqPlotData);
+              //alert(jqPlotData)
+              //var ret = [["2013-08", 5], ["2014-8", 5]];
+              //console.log(ret)
+              //console.log(jQuery.makeArray(data));
             },
             error: function (request, status, error){ console.log("hate u forever!"); }
           });
-          return ret;
+          return [ret];
         };
       
       
@@ -433,11 +443,33 @@
                                  dataRendererOptions: {
                                      unusedOptionalUrl: jsonurl
                                  },
+                                 //series:[{renderer:$.jqplot.BarRenderer}],
+                                 series:[{lineWidth:2}],
+                                 axesDefaults: {
+                                         tickRenderer: $.jqplot.CanvasAxisTickRenderer ,
+                                         tickOptions: {
+                                           angle: 15,
+                                           fontSize: '10pt'
+                                           
+                                         }
+                                     },
                                  axes:{
                                      xaxis:{
                                          label:"Month",
+                                         markSize: 14, 
                                          renderer: $.jqplot.DateAxisRenderer,
-                                         tickOptions:{formatString:'%H:%M'}
+                                         tickRenderer: $.jqplot.CanvasAxisTickRenderer,
+                                         tickOptions:{formatString:'%y-%m',
+                                                     labelPosition: 'start'},
+                                         //min:'March 30, 2014',
+                                         tickInterval:'1 month'
+                                         //min: jsonurl[0][0][0],
+                                         //max: jsonurl[0][jsonurl[0].length-1][0]
+                                         //tickOptions:{formatString:'%H:%M'}
+                                     },
+                                     yaxis:{
+                                         min: 0,
+                                         tickInterval: 1
                                      }
                                  }
                              });

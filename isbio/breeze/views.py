@@ -15,6 +15,7 @@ from django.contrib.auth.models import User, Group
 from django.conf import settings
 from multiprocessing import Process
 from django.utils import simplejson
+from dateutil.relativedelta import relativedelta
 
 import xml.etree.ElementTree as xml
 import shell as rshell
@@ -323,8 +324,28 @@ def ajax_rora_screens(request, gid):
     return HttpResponse(simplejson.dumps(response_data), mimetype='application/json')
     
 def ajax_user_stat(request):
+    timeinfo = User.objects.values_list('date_joined', flat=True)
+    # only keep year and month info
+    timeinfo = [ each.strftime('%Y-%m') for each in timeinfo]
+    # get current time
+    current_time = datetime.today()
+    # store the date for the last 12 months
+    period = [current_time]
+    for each_mon in range(1, 12):
+        period.append(current_time+ relativedelta(months=-each_mon))
+    # format the period
+    period = [ each_month.strftime('%Y-%m') for each_month in period]
+    print(period)
+    # sort and group the time info  
+    #time_group = sorted(set(timeinfo))
     response_data = {}
-    response_data['result'] = [["Aug", 1], ["Sep", 2],["Oct", 3], ["Noe", 4]]
+    #response_data['result'] = [["Aug", 1], ["Sep", 2],["Oct", 3], ["Noe", 4]]
+    for idx, each_group in enumerate(period):
+        count = 0
+        for each_time in timeinfo:
+            if(each_time<=each_group):
+                count = count+1
+        response_data[idx] = [each_group, count]
     #response_data['message'] = ["Aug", "Sep", "Oct", "Nov"]
     print(response_data)
     return HttpResponse(simplejson.dumps(response_data), mimetype='application/json')
