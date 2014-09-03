@@ -2,6 +2,8 @@
 from configurations import Settings
 import logging
 import os
+gettext = lambda s: s
+PROJECT_PATH = os.path.split(os.path.abspath(os.path.dirname(__file__)))[0]
 
 
 class BreezeSettings(Settings):
@@ -40,6 +42,10 @@ class BreezeSettings(Settings):
     # Language code for this installation. All choices can be found here:
     # http://www.i18nguy.com/unicode/language-identifiers.html
     LANGUAGE_CODE = 'en-us'
+    
+    LANGUAGES = (
+        ('en-us', gettext('English')),
+    )
 
     SITE_ID = 1
 
@@ -136,7 +142,9 @@ class BreezeSettings(Settings):
         # Always use forward slashes, even on Windows.
         # Don't forget to use absolute paths, not relative paths.
     )
-
+    MS_TEMPLATES_DIR = {
+        '/Users/liye/Documents/breeze/isbio-master/isbio/breeze/templates',
+    }
     # provide our profile model
     AUTH_PROFILE_MODULE = 'breeze.UserProfile'
 
@@ -151,10 +159,31 @@ class BreezeSettings(Settings):
         'breeze',
         'south',
         'gunicorn',
+        'djangocms_admin_style',  # for the admin skin. You **must** add 'djangocms_admin_style' in the list **before** 'django.contrib.admin'.
         # Uncomment the next line to enable the admin:
         'django.contrib.admin',
+        'cms', # django CMS itself
+        'mptt',
+        'menus',
+        'shop', # the django shop app
+        #'shop.addressmodel', # the default address and country model
+        'sekizai', # for javascript and css management
         # Uncomment the next line to enable admin documentation:
         # 'django.contrib.admindocs',
+    )
+    
+    MIDDLEWARE_CLASSES = (
+        'django.contrib.sessions.middleware.SessionMiddleware',
+        'django.middleware.csrf.CsrfViewMiddleware',
+        'django.contrib.auth.middleware.AuthenticationMiddleware',
+        'django.contrib.messages.middleware.MessageMiddleware',
+        'django.middleware.locale.LocaleMiddleware',
+        'django.middleware.doc.XViewMiddleware',
+        'django.middleware.common.CommonMiddleware',
+        'cms.middleware.user.CurrentUserMiddleware',
+        'cms.middleware.page.CurrentPageMiddleware',
+        'cms.middleware.toolbar.ToolbarMiddleware',
+        'cms.middleware.language.LanguageCookieMiddleware',
     )
 
     # A sample logging configuration. The only tangible logging
@@ -190,7 +219,11 @@ class BreezeSettings(Settings):
         'django.contrib.auth.context_processors.auth',
         'django.core.context_processors.media',
         'django.core.context_processors.static',
-        'breeze.context.user_context'
+        'breeze.context.user_context',
+        'django.contrib.messages.context_processors.messages',
+        'django.core.context_processors.i18n',
+        'sekizai.context_processors.sekizai',
+        'django.core.context_processors.request',
     )
 
 class DevSettings(BreezeSettings):

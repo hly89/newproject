@@ -23,7 +23,7 @@ import auxiliary as aux
 import rora as rora
 
 import forms as breezeForms
-from breeze.models import Rscripts, Jobs, DataSet, UserProfile, InputTemplate, Report, ReportType, Project, Post, Group, Statistics
+from breeze.models import Rscripts, Jobs, DataSet, UserProfile, InputTemplate, Report, ReportType, Project, Post, Group, Statistics, Script_categories
 
 class RequestStorage():
     form_details = OrderedDict()
@@ -203,22 +203,23 @@ def scripts(request, layout="list"):
     # all_scripts = Rscripts.objects.all()
     all_scripts = Rscripts.objects.filter(draft="0").filter(istag="0")
     report_types = ReportType.objects.filter(access=request.user)
-
+    ''''
     cat_list = dict()
     categories = list()
     for script in all_scripts:
         if str(script.category).capitalize() not in categories:
             categories.append(str(script.category).capitalize())
             cat_list[str(script.category).capitalize()] = Rscripts.objects.filter(category__exact=str(script.category)).filter(draft="0").filter(istag="0")
-
+    '''
     # if request.user.has_perm('breeze.add_rscripts'):
     #    cat_list['_My_Scripts_'] = Rscripts.objects.filter(author__exact=request.user)
     #    cat_list['_Datasets_'] = DataSet.objects.all()
-
+    categories = Script_categories.objects.all()
     return render_to_response('scripts.html', RequestContext(request, {
         'script_list': all_scripts,
         'scripts_status': 'active',
-        'cat_list': sorted(cat_list.iteritems()),
+        'cate': categories,
+        #'cat_list': sorted(cat_list.iteritems()),
         'reports': report_types,
         'thumbnails': nails
     }))
@@ -335,7 +336,7 @@ def ajax_user_stat(request):
         period.append(current_time+ relativedelta(months=-each_mon))
     # format the period
     period = [ each_month.strftime('%Y-%m') for each_month in period]
-    print(period)
+    
     # sort and group the time info  
     #time_group = sorted(set(timeinfo))
     response_data = {}
@@ -347,7 +348,7 @@ def ajax_user_stat(request):
                 count = count+1
         response_data[idx] = [each_group, count]
     #response_data['message'] = ["Aug", "Sep", "Oct", "Nov"]
-    print(response_data)
+    
     return HttpResponse(simplejson.dumps(response_data), mimetype='application/json')
 
 def reports_search(request):
@@ -531,7 +532,15 @@ def manage_pipes(request):
 def dochelp(request):
     return render_to_response('help.html', RequestContext(request, {'help_status': 'active'}))
 
-
+@login_required(login_url='/')
+def store(request):
+    categories = Script_categories.objects.all()
+    scripts = Rscripts.objects.all()
+    return render_to_response('store.html', RequestContext(request, {
+        'store_status': 'active',
+        'cate': categories,
+        'script_list': scripts
+    }))
 ######################################
 ###      SUPPLEMENTARY VIEWS       ###
 ######################################
@@ -555,6 +564,9 @@ def script_editor(request, sid=None, tab=None):
         'attr_form': f_attrs,
         'logo_form': f_logos
     }))
+
+
+
 
 @login_required(login_url='/')
 def script_editor_update(request, sid=None):
@@ -1173,6 +1185,29 @@ def new_rtype_dialog(request):
         'layout': 'horizontal',
         'submit': 'Add'
     }))
+    
+@login_required(login_url='/')
+def new_cate_dialog(request):
+    """
+        This view provides a dialog to create a new category in DB.
+    """
+    form = breezeForms.NewCategoryDialog(request.POST or None)
+
+    if form.is_valid():
+        #rshell.init_pipeline(form)
+        new_cate = Script_categories()
+        new_cate = form.save()
+        return HttpResponse(True)
+
+    return render_to_response('forms/basic_form_dialog.html', RequestContext(request, {
+        'form': form,
+        'action': '/new-cate/',
+        'header': 'Create New Category',
+        'layout': 'horizontal',
+        'submit': 'Add'
+    }))
+    
+
 
 @login_required(login_url='/')
 def new_project_dialog(request):
@@ -1342,3 +1377,6 @@ def home_paginate(request):
         return render_to_response(template, RequestContext(request, { tag_symbol: items }))
     else:
         return False
+
+
+    

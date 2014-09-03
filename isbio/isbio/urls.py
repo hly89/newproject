@@ -2,6 +2,7 @@ from django.conf import settings
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.conf.urls import patterns, include, url
 from breeze import views
+from shop import urls as shop_urls
 # Uncomment the next two lines to enable the admin:
 from django.contrib import admin
 admin.autodiscover()
@@ -20,6 +21,9 @@ urlpatterns = patterns('',
     url(r'^ajax-rora-plain-screens/(?P<gid>\d+)$', views.ajax_rora_screens),
     url(r'^update-user-info/$', views.update_user_info_dialog),
     url(r'^help/$', views.dochelp),
+    url(r'^store/$', views.store),
+    #url((r'^addtocart/(?P<sid>\d+)$', view.addtocart),
+    url(r'^shop/', include(shop_urls)),
     url(r'^dbviewer/$', views.dbviewer),
     url(r'^search/(?P<what>[a-z]+)?$', views.search),
     url(r'^reports/$', views.reports),
@@ -42,6 +46,7 @@ urlpatterns = patterns('',
     url(r'^new/$', views.create_script),
     url(r'^new-script/$', views.new_script_dialog),
     url(r'^new-rtype/$', views.new_rtype_dialog),
+    url(r'^new-cate/$', views.new_cate_dialog),
     url(r'^projects/create$', views.new_project_dialog),
     url(r'^projects/edit/(?P<pid>\d+)$', views.edit_project_dialog),
     url(r'^projects/view/(?P<pid>\d+)$', views.veiw_project),

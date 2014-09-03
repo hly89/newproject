@@ -37,7 +37,7 @@
         <ul class="nav nav-list" id="scriptTabs" style="margin-top: 55px;">
           <li class="nav-header"><strong>CATEGORIES:</strong></li>
           <li class="active"><a href="#all" data-toggle="tab"><strong>Show All</strong></a></li>
-          {% for cat, key in cat_list %}
+          {% for cat in cate %}
             <li ><a href="#{{ cat }}" data-toggle="tab"><strong>{{ cat }}</strong></a></li>
           {% endfor %}
           <li class="divider"></li>

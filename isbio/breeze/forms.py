@@ -259,6 +259,11 @@ class NewRepTypeDialog(forms.ModelForm):
         model = breeze.models.ReportType
         fields = ('type', 'description', 'search', 'access')
 
+class NewCategoryDialog(forms.ModelForm):
+    class Meta:
+        model = breeze.models.Script_categories
+        fields = ('category', 'description')
+
 
 class BasicJobForm(forms.Form):
     def __init__(self, user, edit, *args, **kwargs):

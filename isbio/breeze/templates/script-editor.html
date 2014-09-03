@@ -200,6 +200,11 @@ $(document).ready(function() {
                     <i class="icon-plus icon-white"></i>\
                   </a>'
   $('#id_report_type').parent().append(addRTbtn);
+  var addCbtn = '<a id="id_addCbtn" href="#" data-toggle="modal" class="apply btn btn-small btn-inverse" data-target="#Apply"  data-param="/new-cate/">\
+                    <i class="icon-plus icon-white"></i>\
+                  </a>'
+  
+  $('#id_category').parent().append(addCbtn);
   modalConnect();
   if (!$('#id_istag').attr('checked')){
     $('#id_report_type').attr("disabled", "disabled");

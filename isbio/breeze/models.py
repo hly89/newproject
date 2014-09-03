@@ -2,6 +2,7 @@ from django.db import models
 from django.template.defaultfilters import slugify
 from django.db.models.fields.related import ForeignKey
 from django.contrib.auth.models import User
+from shop.models import Product
 
 
 CATEGORY_OPT = (
@@ -62,12 +63,20 @@ class ReportType(models.Model):
 
     class Meta:
         ordering = ('type',)
+        
+class Script_categories(models.Model):
+    category = models.CharField(max_length=55, unique=True)
+    description = models.CharField(max_length=350, blank=True)
+    
+    def __unicode__(self):
+        return self.category
 
 class Rscripts(models.Model):
     name = models.CharField(max_length=35, unique=True)
     inln = models.CharField(max_length=150, blank=True)
     details = models.CharField(max_length=5500, blank=True)
-    category = models.CharField(max_length=25, choices=CATEGORY_OPT, default=u'general')
+    #category = models.CharField(max_length=25, choices=CATEGORY_OPT, default=u'general')
+    category = ForeignKey(Script_categories, to_field="category")
     author = ForeignKey(User)
     creation_date = models.DateField(auto_now_add=True)
     draft = models.BooleanField(default=True)
@@ -95,6 +104,15 @@ class Rscripts(models.Model):
     class Meta:
         ordering = ["name"]
 
+class apps(Product):
+    #appname = models.CharField(max_length=35, unique=True)
+    author = ForeignKey(User)
+    
+    def _unicode_(self):
+        return self.appname
+    
+    class Meta:
+        ordering = ['author']
 
 class Jobs(models.Model):
     jname = models.CharField(max_length=55)
@@ -195,3 +213,8 @@ class Statistics(models.Model):
     
     def __unicode__(self):
         return self.script
+    
+    class Meta:
+        ordering = ['-times']
+
+
