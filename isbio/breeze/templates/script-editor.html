@@ -205,6 +205,9 @@ $(document).ready(function() {
                   </a>'
   
   $('#id_category').parent().append(addCbtn);
+  
+  var pricewarning = '<strong> Please specify the price if you do not want it to be free! </strong>'
+  $('#id_price').parent().append(pricewarning);
   modalConnect();
   if (!$('#id_istag').attr('checked')){
     $('#id_report_type').attr("disabled", "disabled");

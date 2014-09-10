@@ -3,6 +3,11 @@ from django.template.defaultfilters import slugify
 from django.db.models.fields.related import ForeignKey
 from django.contrib.auth.models import User
 from shop.models import Product
+from decimal import Decimal
+
+
+
+
 
 
 CATEGORY_OPT = (
@@ -80,7 +85,7 @@ class Rscripts(models.Model):
     author = ForeignKey(User)
     creation_date = models.DateField(auto_now_add=True)
     draft = models.BooleanField(default=True)
-
+    price = models.DecimalField(max_digits=19, decimal_places=2)
     # tag related
     istag = models.BooleanField(default=False)
     must = models.BooleanField(default=False)  # defines wheather the tag is enabled by default
@@ -103,6 +108,21 @@ class Rscripts(models.Model):
 
     class Meta:
         ordering = ["name"]
+# define the table to store the products in user's cart
+class CartInfo(models.Model):
+    script_buyer = ForeignKey(User)
+    product = ForeignKey(Rscripts)
+    date_created = models.DateField(auto_now_add=True)
+    date_updated = models.DateField(auto_now_add=True)
+    # if the user does not pay active == True else active == False
+    active = models.BooleanField(default=True)
+    
+    def __unicode__(self):
+        return self.buyer
+    
+    class Meta:
+        ordering = ["active"]
+    
 
 class apps(Product):
     #appname = models.CharField(max_length=35, unique=True)

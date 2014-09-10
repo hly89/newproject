@@ -23,7 +23,7 @@ import auxiliary as aux
 import rora as rora
 
 import forms as breezeForms
-from breeze.models import Rscripts, Jobs, DataSet, UserProfile, InputTemplate, Report, ReportType, Project, Post, Group, Statistics, Script_categories
+from breeze.models import Rscripts, Jobs, DataSet, UserProfile, InputTemplate, Report, ReportType, Project, Post, Group, Statistics, Script_categories, CartInfo
 
 class RequestStorage():
     form_details = OrderedDict()
@@ -317,7 +317,20 @@ def ajax_rora_action(request):
     response_data = {}
 
     return HttpResponse(simplejson.dumps(response_data), mimetype='application/json')
+    
+@login_required(login_url='/')
+def addtocart(request, sid=None):
+    #categories = Script_categories.objects.all()
+    scripts = Rscripts.objects.get(id = sid)
+    print(scripts)
+    mycart = CartInfo()
+    mycart.script_buyer = request.user
+    mycart.product = scripts
+    mycart.active = True
+    mycart.save()
+    return HttpResponse(simplejson.dumps({"status": "OK"}), mimetype='application/json')
 
+    
 def ajax_rora_screens(request, gid):
 
     response_data = rora.getScreenGroupContent(groupID=gid)

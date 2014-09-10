@@ -2,7 +2,7 @@
 
 {% load bootstrap_toolkit %}
 
-{% block title %}Script Book{% endblock %}
+{% block title %}Market{% endblock %}
 
 {% block extra_head %}
 
@@ -65,7 +65,7 @@
                       <head>
                         <tr>
                           <th>Logo</th> <th>Name</th> <th>Data</th>
-                          <th>Details</th><th>Cart</th>
+                          <th>Details</th><th>Price</th><th>Cart</th>
                         </tr>
                       </head>
                       <tbody>
@@ -80,10 +80,21 @@
                             </a>
                           </td>
                           <td style="vertical-align: middle">
-                            <a href="#" data-toggle="modal" class="btn btn-inverse apply" data-target="#Apply"  data-param="/scripts/apply-script/{{ scr.id }}">
+                              <strong> 
+                                  {% if scr.price > 0 %}
+                                  <span class='label label-success'>{{ scr.price }}</span> 
+                                  {% else %}
+                                  <span class='label label-important'>{{ scr.price }}</span> 
+                                  {% endif %}
+                               </strong>
+                          </td>
+                          <td style="vertical-align: middle">
+                              
+                            <a href="/addtocart/{{ scr.id }}" class="btn btn-inverse apply"   data-param="/addtocart/{{ scr.id }}">
                               <strong>Add&nbsp;to&nbsp; Cart&nbsp;<i class="icon-shopping-cart icon-white"></i></strong>
                             </a>
                           </td>
+
                         </tr>
                         {% endfor %}
                       </tbody>
@@ -116,7 +127,6 @@
 
 <script type="text/javascript">
 $(document).ready(function() {
-  modalConnect();
 
   // initialize Multiselect plugin for Dotmatix Samples
   var multiConfigurationSet = {
@@ -127,103 +137,36 @@ $(document).ready(function() {
   $('.dotmatix_samples').multiselect(multiConfigurationSet);
 
 
-
   $(".describe").click(function(ev) {
     ev.preventDefault(); // prevent navigation
     var par = $(this).data("param");
+    //console.log("clicked");
     $("#Describe").load("/scripts/read-descr/"+par, function() {
+      //console.log("ajax sent");
       $(this).modal('show');
     });
     return false; // prevent the click propagation
   });
-
-function submitItemModalFormBind(url){
-         $('#form_modal_apply').submit(function(ev){
-             var formData = new FormData($('.script-form')[0]);
-             $.ajax({
-                type: "POST",
-                url: url,
-                enctype: 'multipart/form-data',
-                data: formData,
-                success:function(response, textStatus, jqXHR){
-                     var form = $("#form_modal_apply_div", response);
-                     //form is returned if it is not valid. update modal with returned form
-                     //change this "if" to check for a specific return code which should be set in the view
-                     if (form.html()) {
-                        //update modal div
-
-                         $('#form_modal_apply_div').html(form);
-
-                         // activate Multiselect plugin
-                         $('.dotmatix_samples').multiselect(multiConfigurationSet);
-
-                         $("input:file").each(function(){
-                           if ( $(this).hasClass('TPL') ){
-                             var which = $(this).attr('which');
-                             $(this).after('<br/><a href="/get/template/' + which.toString() + '" class="btn btn-mini btn-primary"> Click to download a template<a/>');
-                             // $(this).customFileInput({ });
-                           }
-                         });
-
-                         $("#Apply").modal('show');
-                      }
-                      //form is not returned if form submission succeeded
-                      else{
-                        //update the entire document with the response received since we received a entire success page and we want to reload the entire page
-                        //document.open();
-                        //document.write(response);
-                        //document.close();
-                        //$("#Apply").modal('hide');
-                        window.location.href = '/jobs/';
-                      }
-                },
-                error: function (request, status, error) {
-                            //implement proper error handling
-                            console.log("failure");
-                            console.log(request.responseText);
-                    },
-                cache: false,
-                contentType: false,
-                processData: false
-                    });
-                    return false;
-                });
-              }
-function modalConnect()
-        {
-            //unbind the click event. If not done we will end up with multiple click event bindings, since binding is done after each ajax call.
-            $(".apply").unbind('click');
-            //bind the click event
-            $(".apply").click(function(ev) {
-                ev.preventDefault(); // prevent navigation
-                var par = $(this).data("param");
-                $.get(par.toString(), function(results){
-                  //update the dom with the received form
-                  $('#Apply').html(results);
-
-                  // activate Multiselect plugin
-                  $('.dotmatix_samples').multiselect(multiConfigurationSet);
-
-                  $("input:file").each(function(){
-                    if ( $(this).hasClass('TPL') ){
-                      var which = $(this).attr('which');
-                      $(this).after('<br/><a href="/get/template/' + which.toString() + '" class="btn btn-mini btn-primary"> Click to download a template<a/>');
-                      // $(this).customFileInput({ });
-                    }
-                  });
-
-                  // $("input:file").customFileInput({ });
-                  $("#Apply").modal('show');
-
-                  $(document).ready(function () {
-                     //bind the form to an ajax call. ajax call will be set to the received update url
-                     submitItemModalFormBind(par.toString());
-                  });
-
-                }, "html");
-                return false; // prevent the click propagation
-            })
-        }
+ 
+  $(".apply").click(function(ev) {
+    ev.preventDefault(); // prevent navigation
+    var par = $(this).data("param");
+    console.log(par);
+    $.ajax({
+      type: "GET",
+      url: par,
+      //data: {"hello": par},
+      success: function(response){
+        console.log("success");
+        //else $('#save_code_btn').attr('disabled', ''); // SAVE button disabled after saving
+      },
+      error: function (request, status, error) {
+                  //implement proper error handling
+                  console.log("failure");
+                  //console.log(request.responseText);
+      }
+    });
+  });
 
 });
 </script>
