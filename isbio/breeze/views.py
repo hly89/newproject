@@ -199,10 +199,18 @@ def scripts(request, layout="list"):
         nails = True
     else:
         nails = False
-
+    categories = Script_categories.objects.all()
     # all_scripts = Rscripts.objects.all()
-    all_scripts = Rscripts.objects.filter(draft="0").filter(istag="0")
-    report_types = ReportType.objects.filter(access=request.user)
+    user = User.objects.get(username=request.user)
+    all_scripts = user.users.all()
+    cat_list = dict()
+    cate = list()
+    for each_cate in categories:
+        cat_list[str(each_cate.category).capitalize()] = all_scripts.filter(category=each_cate, istag="0", draft="0")
+        cate.append(str(each_cate.category).capitalize())
+    
+    cat_list['reports'] = all_scripts.filter(istag="1")
+    #report_types = ReportType.objects.filter(access=request.user)
     ''''
     cat_list = dict()
     categories = list()
@@ -214,13 +222,13 @@ def scripts(request, layout="list"):
     # if request.user.has_perm('breeze.add_rscripts'):
     #    cat_list['_My_Scripts_'] = Rscripts.objects.filter(author__exact=request.user)
     #    cat_list['_Datasets_'] = DataSet.objects.all()
-    categories = Script_categories.objects.all()
+    
     return render_to_response('scripts.html', RequestContext(request, {
         'script_list': all_scripts,
         'scripts_status': 'active',
-        'cate': categories,
-        #'cat_list': sorted(cat_list.iteritems()),
-        'reports': report_types,
+        'cate': cate,
+        'cat_list': sorted(cat_list.iteritems()),
+        #'reports': report_types,
         'thumbnails': nails
     }))
 
@@ -320,17 +328,47 @@ def ajax_rora_action(request):
     
 @login_required(login_url='/')
 def addtocart(request, sid=None):
-    #categories = Script_categories.objects.all()
-    scripts = Rscripts.objects.get(id = sid)
-    print(scripts)
-    mycart = CartInfo()
-    mycart.script_buyer = request.user
-    mycart.product = scripts
-    mycart.active = True
-    mycart.save()
-    return HttpResponse(simplejson.dumps({"status": "OK"}), mimetype='application/json')
+    # check if this item in the cart already
+    try:
+        items = CartInfo.objects.get(product = sid)
+        #print("he")
+        return HttpResponse(simplejson.dumps({"exist": "Yes"}), mimetype='application/json')
+    except CartInfo.DoesNotExist:
+        #print("shit")
+        scripts = Rscripts.objects.get(id = sid)
+        #print(scripts)
+        mycart = CartInfo()
+        mycart.script_buyer = request.user
+        mycart.product = scripts
+        if(scripts.price>0): mycart.type_app = False
+        else: mycart.type_app = True
+        mycart.active = True
+        mycart.save()
+        return HttpResponse(simplejson.dumps({"exist": "No"}), mimetype='application/json')
 
+@login_required(login_url='/')
+def deletecart(request, sid=None):
+    #print(sid)
+    try:
+        items = CartInfo.objects.get(product = sid)
+        
+        items.delete()
+        print("he")
+        return HttpResponse(simplejson.dumps({"delete": "Yes"}), mimetype='application/json')
+    except CartInfo.DoesNotExist:
+        return HttpResponse(simplejson.dumps({"delete": "No"}), mimetype='application/json')
     
+@login_required(login_url='/')
+def deletefree(request):
+    #print(sid)
+    try:
+        items = CartInfo.objects.filter(type_app = True)
+        items.delete()
+        print("he")
+        return HttpResponse(simplejson.dumps({"delete": "Yes"}), mimetype='application/json')
+    except CartInfo.DoesNotExist:
+        return HttpResponse(simplejson.dumps({"delete": "No"}), mimetype='application/json')
+        
 def ajax_rora_screens(request, gid):
 
     response_data = rora.getScreenGroupContent(groupID=gid)
@@ -548,12 +586,43 @@ def dochelp(request):
 @login_required(login_url='/')
 def store(request):
     categories = Script_categories.objects.all()
-    scripts = Rscripts.objects.all()
+    cate = list()
+    scripts = Rscripts.objects.filter(draft="0", istag="0")
+    cat_list = dict()
+    #categories = list()
+    for each_cate in categories:
+        cat_list[str(each_cate.category).capitalize()] = Rscripts.objects.filter(category=each_cate, istag="0", draft="0")
+        cate.append(str(each_cate.category).capitalize())
+    
+    cat_list['reports'] = Rscripts.objects.filter(istag="1")
+    '''
+    for script in all_scripts:
+        if str(script.category).capitalize() not in categories:
+            categories.append(str(script.category).capitalize())
+            cat_list[str(script.category).capitalize()] = Rscripts.objects.filter(category__exact=str(script.category)).filter(draft="0").filter(istag="0")
+    '''
     return render_to_response('store.html', RequestContext(request, {
         'store_status': 'active',
-        'cate': categories,
-        'script_list': scripts
+        'cate': cate,
+        'script_list': scripts,
+        'cat_list': sorted(cat_list.iteritems())
     }))
+    
+@login_required(login_url='/')
+def mycart(request):
+    
+    #print(stype)
+    all_items = CartInfo.objects.filter(script_buyer=request.user)
+    items_free = list(CartInfo.objects.filter(script_buyer=request.user, type_app=True))
+    items_nonfree = list(CartInfo.objects.filter(script_buyer=request.user, type_app=False))
+    #print(cart)
+    return render_to_response('cart.html', RequestContext(request, {
+        'mycart_status': 'active',
+        'items_free': items_free,
+        'items_nonfree': items_nonfree,
+        'all_items': all_items 
+    }))
+
 ######################################
 ###      SUPPLEMENTARY VIEWS       ###
 ######################################

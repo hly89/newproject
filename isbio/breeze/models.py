@@ -92,7 +92,7 @@ class Rscripts(models.Model):
     order = models.DecimalField(max_digits=3, decimal_places=1, blank=True, default=0)
     report_type = models.ManyToManyField(ReportType, null=True, blank=True, default=None)  # assosiation with report type
     #report_type = models.ForeignKey(ReportType, null=True, blank=True, default=None)  # assosiation with report type
-
+    access = models.ManyToManyField(User, null=True, blank=True, default=None, related_name="users")
     def file_name(self, filename):
         fname, dot, extension = filename.rpartition('.')
         slug = slugify(self.name)
@@ -112,13 +112,15 @@ class Rscripts(models.Model):
 class CartInfo(models.Model):
     script_buyer = ForeignKey(User)
     product = ForeignKey(Rscripts)
+    # if free or not
+    type_app = models.BooleanField(default=True)
     date_created = models.DateField(auto_now_add=True)
     date_updated = models.DateField(auto_now_add=True)
     # if the user does not pay active == True else active == False
     active = models.BooleanField(default=True)
     
     def __unicode__(self):
-        return self.buyer
+        return self.product.name
     
     class Meta:
         ordering = ["active"]

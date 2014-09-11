@@ -65,7 +65,7 @@
                       <head>
                         <tr>
                           <th>Logo</th> <th>Name</th> <th>Data</th>
-                          <th>Details</th><th>Price</th><th>Cart</th>
+                          <th>Details</th><th>Price</th><th>Action</th>
                         </tr>
                       </head>
                       <tbody>
@@ -81,7 +81,7 @@
                           </td>
                           <td style="vertical-align: middle">
                               <strong> 
-                                  {% if scr.price > 0 %}
+                                  {% if scr.price == 0 %}
                                   <span class='label label-success'>{{ scr.price }}</span> 
                                   {% else %}
                                   <span class='label label-important'>{{ scr.price }}</span> 
@@ -96,12 +96,67 @@
                           </td>
 
                         </tr>
+                        {% empty %}
+                        <tr>
+                            <td></td> <td><p>No resources available!</p></td> <td></td>
+                            <td></td>
+                            <td></td><td></td>
+                        </tr>
                         {% endfor %}
                       </tbody>
                     </table>
                 </div>
+                <!-- show category-->
+                {% for cat, scr_list in cat_list %}
+                <div class="tab-pane" id="{{ cat }}">
 
+                  <table class="table table-striped">
+                    <head>
+                      <tr>
+                        <th>Logo</th> <th>Name</th> <th>Data</th>
+                        <th>Details</th><th>Price</th><th>Action</th>
+                      </tr>
+                    </head>
+                    <tbody>
+                      {% for scr in scr_list %}
+                      <tr>
+                        <td style="vertical-align: middle"><img {% if scr.logo %} src="/media/{{ scr.logo }}" {% else %} src="/static/logos/rlogo.jpg" {% endif %} width="55" height="55" class="img-rounded"></td>
+                        <td style="vertical-align: middle"><strong>{{ scr.name }} <br /> <span class="subscript"> (author: {{ scr.author }}) </span> </strong></td>
+                        <td style="vertical-align: middle"><i>{{ scr.creation_date }}</i></td>
+                        <td style="vertical-align: middle">
+                          <a href="#" data-toggle="modal" class="btn btn-primary describe" data-target="#Describe" data-param={{ scr.id }}>
+                            <i class="icon-info-sign icon-white"></i>
+                          </a>
+                        </td>
+                        <td style="vertical-align: middle">
+                            <strong> 
+                                {% if scr.price == 0 %}
+                                <span class='label label-success'>{{ scr.price }}</span> 
+                                {% else %}
+                                <span class='label label-important'>{{ scr.price }}</span> 
+                                {% endif %}
+                             </strong>
+                        </td>
+                        <td style="vertical-align: middle">
+                            
+                          <a href="/addtocart/{{ scr.id }}" class="btn btn-inverse apply"   data-param="/addtocart/{{ scr.id }}">
+                            <strong>Add&nbsp;to&nbsp; Cart&nbsp;<i class="icon-shopping-cart icon-white"></i></strong>
+                          </a>
+                        </td>
+
+                      </tr>
+                      {% empty %}
+                      <tr>
+                          <td></td> <td><p>No resources available!</p></td> <td></td>
+                          <td></td>
+                          <td></td><td></td>
+                      </tr>
+                        
+                      {% endfor %}
+                    </tbody>
+                  </table>
                 </div>
+                {% endfor %}
             </div>
         </div>
     </div>
@@ -109,19 +164,19 @@
 
 <div class="row-fluid">&nbsp;</div>
 
-<div id="Apply" class="modal fade" role="dialog"  aria-hidden="true" style="background: url('/static/nail.png');"></div>
+
 <div id="Describe" class="modal fade" role="dialog"  aria-hidden="true" style="background: url('/static/nail.png');"></div>
 
-<div id="RepTypeInfo" class="modal hide fade" role="dialog"  aria-hidden="true">
+<div id="WarningInfo" class="modal hide " role="dialog"  aria-hidden="true">
   <div class="modal-header">
     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-    <h3 id="info_title"> </h3>
+    <h3 id="info_title"> Warning Information </h3>
   </div>
   <div class="modal-body">
-    <p id="info_body"></p>
+    <p> &nbsp; &nbsp;This app has already in your cart! </p>
   </div>
   <div class="modal-footer">
-    <a href="#" class="btn btn-inverse" data-dismiss="modal" aria-hidden="true">Close</a>
+    <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
   </div>
 </div>
 
@@ -151,19 +206,32 @@ $(document).ready(function() {
   $(".apply").click(function(ev) {
     ev.preventDefault(); // prevent navigation
     var par = $(this).data("param");
-    console.log(par);
+    //console.log(par);
     $.ajax({
       type: "GET",
       url: par,
       //data: {"hello": par},
-      success: function(response){
-        console.log("success");
-        //else $('#save_code_btn').attr('disabled', ''); // SAVE button disabled after saving
+      success: function(data){
+          //console.log(data);
+          if(data['exist']=="Yes"){
+              bootbox.dialog({
+                  message: "This app has already in your cart!",
+                  title: "Warning",
+                  buttons: {
+                  success: {
+                  label: "Ok",
+                  className: "btn-success",
+                  callback: function() {
+                  //console.log("success");
+                  }
+                  }
+                  }
+                  });
+          } 
       },
       error: function (request, status, error) {
                   //implement proper error handling
                   console.log("failure");
-                  //console.log(request.responseText);
       }
     });
   });
