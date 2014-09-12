@@ -39,8 +39,8 @@
                 <div class="tabbable">
                   <!-- Tabs' Header -->
                   <ul class="nav nav-tabs">
-                    <li class="free active"><a href="#free_app" data-toggle="tab">Free</a></li>
-                    <li class="nonfree"><a href="#nonfree_app" data-toggle="tab">NonFree</a></li>
+                    <li class="free active"><a href="#free_app" data-toggle="tab">FREE</a></li>
+                    <li class="nonfree"><a href="#nonfree_app" data-toggle="tab">PAID</a></li>
 
                   </ul>
                   <!-- Tabs' Content -->
@@ -78,8 +78,8 @@
                           </td>
                           <td style="vertical-align: middle">
                               
-                            <a href="/addtocart/{{ scr.id }}" class="btn btn-inverse apply"   data-param="/addtocart/{{ each.product.id }}">
-                              <i class="icon-play icon-white"></i>
+                            <a href="/addtocart/{{ scr.id }}" class="btn btn-success apply"   data-param="/addtocart/{{ each.product.id }}">
+                              <i class="icon-black icon-download-alt"></i>
                             </a>
                           </td>
                           <td style="vertical-align: middle">
@@ -96,12 +96,14 @@
                           <td></td><td></td><td></td>
                         </tr>
                         {% endfor %}
+                        
+                        {% if items_free.count > 0 %}
                         <tr>
                             <td></td><td></td><td></td><td></td><td></td>
                             <td style="vertical-align: middle" align="right">
                               
-                              <a href="#" class="btn btn-inverse apply"   data-param="#">
-                                   <strong>All&nbsp;<i class="icon-play icon-white"></i></strong>
+                              <a href="#" class="btn btn-success apply"   data-param="#">
+                                   <strong>All&nbsp;<i class="icon-black icon-download-alt"></i></strong>
                                 
                               </a>
                             </td>
@@ -113,6 +115,7 @@
                               </a>
                             </td>
                         </tr>
+                        {% endif %}
                       </tbody>
                     </table>
                 
@@ -152,8 +155,8 @@
                           </td>
                           <td style="vertical-align: middle">
                               
-                            <a href="/addtocart/{{ scr.id }}" class="btn btn-inverse apply"   data-param="/addtocart/{{ each.product.id }}">
-                              <i class="icon-play icon-white"></i>
+                            <a href="/addtocart/{{ scr.id }}" class="btn btn-success install"   data-param="/addtocart/{{ each.product.id }}">
+                              <i class="icon-black icon-download-alt"></i>
                             </a>
                           </td>
                           <td style="vertical-align: middle">
@@ -170,23 +173,25 @@
                              <td></td><td></td><td></td>
                            </tr>
                         {% endfor %}
+                        {% if items_nonfree.count > 0 %}
                         <tr>
                             <td></td><td></td><td></td><td></td><td></td>
                             <td style="vertical-align: middle">
                               
-                              <a href="#" class="btn btn-inverse apply"   data-param="#">
-                                   <strong>All&nbsp;<i class="icon-play icon-white"></i></strong>
+                              <a href="#" class="btn btn-success install_all"   data-param="#">
+                                   <strong>All&nbsp;<i class="icon-black icon-download-alt"></i></strong>
                                 
                               </a>
                             </td>
                             <td style="vertical-align: middle" >
                               
-                              <a href="#" class="btn btn-danger apply"   data-param="#">
+                              <a href="#" class="btn btn-danger deleteall"   data-param="deletenonfree">
                                    <strong>All&nbsp;<i class="icon-trash"></i></strong>
                                 
                               </a>
                             </td>
                         </tr>
+                        {% endif %}
                       </tbody>
                     </table>
                 
@@ -203,7 +208,7 @@
 
 <div class="row-fluid">&nbsp;</div>
 
-<div id="Apply" class="modal fade" role="dialog"  aria-hidden="true" style="background: url('/static/nail.png');"></div>
+
 <div id="Describe" class="modal fade" role="dialog"  aria-hidden="true" style="background: url('/static/nail.png');"></div>
 
 <div id="RepTypeInfo" class="modal hide fade" role="dialog"  aria-hidden="true">
@@ -310,8 +315,9 @@ $(document).ready(function() {
           success: function(response){
             //if(response['delete']='Yes'){console.log("delete");}
             parent.fadeOut('slow', function(){
-                //$(this).after(<tboday></tbody>);
+                $(this).after('<tbody><tr><td></td><td><p>No resources available!</p></td> <td></td><td></td><td></td><td></td><td></td></tr></tbody>');
                 $(this).remove();
+                //$(this).parent().remove();
                 //console.log($('#testing').attr(););
             });
             

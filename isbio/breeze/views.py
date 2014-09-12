@@ -351,10 +351,12 @@ def deletecart(request, sid=None):
     #print(sid)
     try:
         items = CartInfo.objects.get(product = sid)
-        
+        cate = items[0].type_app
+        print(cate)
+        count_app = CartInfo.objects.filter(type_app=cate).count()
         items.delete()
-        print("he")
-        return HttpResponse(simplejson.dumps({"delete": "Yes"}), mimetype='application/json')
+        #print("he")
+        return HttpResponse(simplejson.dumps({"delete": "Yes", "count_app": count_app}), mimetype='application/json')
     except CartInfo.DoesNotExist:
         return HttpResponse(simplejson.dumps({"delete": "No"}), mimetype='application/json')
     
@@ -364,7 +366,18 @@ def deletefree(request):
     try:
         items = CartInfo.objects.filter(type_app = True)
         items.delete()
-        print("he")
+        #print("he")
+        return HttpResponse(simplejson.dumps({"delete": "Yes"}), mimetype='application/json')
+    except CartInfo.DoesNotExist:
+        return HttpResponse(simplejson.dumps({"delete": "No"}), mimetype='application/json')
+        
+@login_required(login_url='/')
+def deletenonfree(request):
+    #print(sid)
+    try:
+        items = CartInfo.objects.filter(type_app = False)
+        items.delete()
+        #print("he")
         return HttpResponse(simplejson.dumps({"delete": "Yes"}), mimetype='application/json')
     except CartInfo.DoesNotExist:
         return HttpResponse(simplejson.dumps({"delete": "No"}), mimetype='application/json')
@@ -613,7 +626,7 @@ def mycart(request):
     
     #print(stype)
     all_items = CartInfo.objects.filter(script_buyer=request.user)
-    items_free = list(CartInfo.objects.filter(script_buyer=request.user, type_app=True))
+    items_free = CartInfo.objects.filter(script_buyer=request.user, type_app=True)
     items_nonfree = list(CartInfo.objects.filter(script_buyer=request.user, type_app=False))
     #print(cart)
     return render_to_response('cart.html', RequestContext(request, {
