@@ -330,9 +330,13 @@ def ajax_rora_action(request):
 def addtocart(request, sid=None):
     # check if this item in the cart already
     try:
-        items = CartInfo.objects.get(product = sid)
-        #print("he")
-        return HttpResponse(simplejson.dumps({"exist": "Yes"}), mimetype='application/json')
+        
+        scr = Rscripts.objects.get(id = sid)
+        #print(scr.author)
+        if(scr.author == request.user): return HttpResponse(simplejson.dumps({"author": "Yes"}), mimetype='application/json')
+        else:
+            items = CartInfo.objects.get(product = sid)
+            return HttpResponse(simplejson.dumps({"exist": "Yes"}), mimetype='application/json')
     except CartInfo.DoesNotExist:
         #print("shit")
         scripts = Rscripts.objects.get(id = sid)
@@ -351,14 +355,40 @@ def deletecart(request, sid=None):
     #print(sid)
     try:
         items = CartInfo.objects.get(product = sid)
-        cate = items[0].type_app
-        print(cate)
+        cate = items.type_app
+        #print(cate)
         count_app = CartInfo.objects.filter(type_app=cate).count()
+        #print(count_app)
         items.delete()
         #print("he")
-        return HttpResponse(simplejson.dumps({"delete": "Yes", "count_app": count_app}), mimetype='application/json')
+        return HttpResponse(simplejson.dumps({"delete": "Yes", 'count_app': count_app}), mimetype='application/json')
     except CartInfo.DoesNotExist:
         return HttpResponse(simplejson.dumps({"delete": "No"}), mimetype='application/json')
+        
+@login_required(login_url='/')
+def install(request, sid=None):
+    #print(sid)
+    try:
+        items = Rscripts.objects.get(id = sid)
+        # first check if has already installed
+        items_users = items.access.all()
+        if request.user in items_users: 
+            cate = CartInfo.objects.get(product = sid).type_app
+            count_app = CartInfo.objects.filter(type_app=cate).count()
+            # delete this app from cart
+            CartInfo.objects.get(product = sid).delete()
+            return HttpResponse(simplejson.dumps({"install_status": "exist", 'count_app':count_app}), mimetype='application/json')
+        else:
+            
+            cate = CartInfo.objects.get(product = sid).type_app
+            items.access.add(request.user)
+
+            # delete this app from cart
+            CartInfo.objects.get(product = sid).delete()
+            count_app = CartInfo.objects.filter(type_app=cate).count()
+            return HttpResponse(simplejson.dumps({"install_status": "Yes", 'count_app': count_app}), mimetype='application/json')
+    except CartInfo.DoesNotExist:
+        return HttpResponse(simplejson.dumps({"install_status": "No"}), mimetype='application/json')
     
 @login_required(login_url='/')
 def deletefree(request):
@@ -627,8 +657,7 @@ def mycart(request):
     #print(stype)
     all_items = CartInfo.objects.filter(script_buyer=request.user)
     items_free = CartInfo.objects.filter(script_buyer=request.user, type_app=True)
-    items_nonfree = list(CartInfo.objects.filter(script_buyer=request.user, type_app=False))
-    #print(cart)
+    items_nonfree = CartInfo.objects.filter(script_buyer=request.user, type_app=False)
     return render_to_response('cart.html', RequestContext(request, {
         'mycart_status': 'active',
         'items_free': items_free,

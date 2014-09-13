@@ -228,6 +228,21 @@ $(document).ready(function() {
                   }
                   });
           } 
+          if(data['author']=="Yes"){
+              bootbox.dialog({
+                  message: "This app has been developed by you!",
+                  title: "Warning",
+                  buttons: {
+                  success: {
+                  label: "Ok",
+                  className: "btn-success",
+                  callback: function() {
+                  //console.log("success");
+                  }
+                  }
+                  }
+                  });
+          }
       },
       error: function (request, status, error) {
                   //implement proper error handling

@@ -78,7 +78,7 @@
                           </td>
                           <td style="vertical-align: middle">
                               
-                            <a href="/addtocart/{{ scr.id }}" class="btn btn-success apply"   data-param="/addtocart/{{ each.product.id }}">
+                            <a href="#" class="btn btn-success installapp"   data-param="/installscripts/{{ each.product.id }}">
                               <i class="icon-black icon-download-alt"></i>
                             </a>
                           </td>
@@ -102,7 +102,7 @@
                             <td></td><td></td><td></td><td></td><td></td>
                             <td style="vertical-align: middle" align="right">
                               
-                              <a href="#" class="btn btn-success apply"   data-param="#">
+                              <a href="#" class="btn btn-success installall"   data-param="#">
                                    <strong>All&nbsp;<i class="icon-black icon-download-alt"></i></strong>
                                 
                               </a>
@@ -155,7 +155,7 @@
                           </td>
                           <td style="vertical-align: middle">
                               
-                            <a href="/addtocart/{{ scr.id }}" class="btn btn-success install"   data-param="/addtocart/{{ each.product.id }}">
+                            <a  class="btn btn-success install"   data-param="/payapp/{{ each.product.id }}">
                               <i class="icon-black icon-download-alt"></i>
                             </a>
                           </td>
@@ -173,19 +173,20 @@
                              <td></td><td></td><td></td>
                            </tr>
                         {% endfor %}
+                        
                         {% if items_nonfree.count > 0 %}
                         <tr>
                             <td></td><td></td><td></td><td></td><td></td>
-                            <td style="vertical-align: middle">
+                            <td style="vertical-align: middle" align="right">
                               
-                              <a href="#" class="btn btn-success install_all"   data-param="#">
+                              <a href="#" class="btn btn-success apply"   data-param="#">
                                    <strong>All&nbsp;<i class="icon-black icon-download-alt"></i></strong>
                                 
                               </a>
                             </td>
-                            <td style="vertical-align: middle" >
+                            <td style="vertical-align: middle" align="right">
                               
-                              <a href="#" class="btn btn-danger deleteall"   data-param="deletenonfree">
+                              <a href="#" class="btn btn-danger deleteall"   data-param="deletefree">
                                    <strong>All&nbsp;<i class="icon-trash"></i></strong>
                                 
                               </a>
@@ -271,8 +272,13 @@ $(document).ready(function() {
           url: par,
           //data: {"hello": par},
           success: function(response){
-            //if(response['delete']='Yes'){console.log("delete");}
-            parent.fadeOut('slow', function(){$(this).remove();});
+              if(response['count_app']==1){parent.fadeOut('slow', function(){
+                  $(this).parent().after('<tbody><tr><td></td><td><p>No resources available!</p></td> <td></td><td></td><td></td><td></td><td></td></tr></tbody>');
+                  $(this).parent().remove();
+
+              });} else 
+              {parent.fadeOut('slow', function(){$(this).remove();});}
+            
           },
           error: function (request, status, error) {
                       //implement proper error handling
@@ -287,6 +293,8 @@ $(document).ready(function() {
     });
     
   });
+  
+
   
   
   $(".deleteall").click(function(ev) {
@@ -326,6 +334,72 @@ $(document).ready(function() {
           error: function (request, status, error) {
                       //implement proper error handling
                       console.log("failure");
+                      //console.log(request.responseText);
+          }
+        });
+    //Example.show("uh oh, look out!");
+    }
+    }
+    }
+    });
+    
+  });
+  
+  
+  $(".installapp").click(function(ev) {
+    ev.preventDefault(); // prevent navigation
+    var par = $(this).data("param");
+    var parent = $(this).parent().parent();
+    console.log(par);
+    bootbox.dialog({
+    message: "Install it for free ",
+    title: "Agreement",
+    buttons: {
+    success: {
+    label: "Cancel",
+    className: "btn-danger",
+    callback: function() {
+    //console.log("success");
+    }
+    },
+    danger: {
+    label: "Sure",
+    className: "btn-success",
+    callback: function() {
+        $.ajax({
+          type: "GET",
+          url: par,
+          //data: {"hello": par},
+          success: function(response){
+              //console.log(response)
+              if(response['install_status']=='exist'){
+                  bootbox.dialog({
+                  message: "You have already installed this app! ",
+                  title: "Warning",
+                  buttons: {
+                  success: {
+                  label: "OK",
+                  className: "btn-success",
+                  callback: function() {
+                      if(response['count_app']==1){
+                          parent.fadeOut('slow', function(){
+                                            $(this).parent().after('<tbody><tr><td></td><td><p>No resources available!</p></td> <td></td><td></td><td></td><td></td><td></td></tr></tbody>');
+                                            $(this).parent().remove();
+
+                                        });
+                      } else {
+                          parent.fadeOut('slow', function(){$(this).remove();});
+                      }
+                  //console.log("success");
+                  }
+                  }
+                  }
+                  });
+              }
+          },
+          error: function (request, status, error) {
+                      //implement proper error handling
+                      console.log(status);
                       //console.log(request.responseText);
           }
         });
