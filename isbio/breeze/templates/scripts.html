@@ -96,9 +96,10 @@
                 <head>
                   <tr>
                     <th>Logo</th> <th>Name</th> <th>Inline Description</th><th>Detials</th>
-                    <th>Action</th>
+                    <th>Action</th><th>Delete</th>
                   </tr>
                 </head>
+                
                 <tbody>
                   {% for scr in script_list %}
                   <tr>
@@ -114,6 +115,10 @@
                       <a href="#" data-toggle="modal" class="btn btn-inverse apply" data-target="#Apply"  data-param="/scripts/apply-script/{{ scr.id }}">
                         <strong>Create&nbsp;Job&nbsp;&nbsp;<i class="icon-tasks icon-white"></i></strong>
                       </a>
+                    </td>
+                    <td style="vertical-align: middle">
+                        <a  class="btn btn-danger deletescript"   data-param="/deletescript/{{ scr.id }}" data-cate="all">
+                          <i class="icon-trash"></i>
                     </td>
                   </tr>
                   {% endfor %}
@@ -153,7 +158,7 @@
                 <head>
                   <tr>
                     <th>Logo</th> <th>Name</th> <th>Inline Description</th>
-                    <th>Details</th><th>Action</th>
+                    <th>Details</th><th>Action</th> <th>Delete</th>
                   </tr>
                 </head>
                 <tbody>
@@ -171,6 +176,10 @@
                       <a href="#" data-toggle="modal" class="btn btn-inverse apply" data-target="#Apply"  data-param="/scripts/apply-script/{{ scr.id }}">
                         <strong>Create&nbsp;Job&nbsp;&nbsp;<i class="icon-tasks icon-white"></i></strong>
                       </a>
+                    </td>
+                    <td style="vertical-align: middle">
+                        <a  class="btn btn-danger deletescript"   data-param="/deletescript/{{ scr.id }}" data-cate="{{ cat }}">
+                          <i class="icon-trash"></i>
                     </td>
                   </tr>
                   {% empty %}
@@ -251,7 +260,62 @@ $(document).ready(function() {
     maxHeight: 450
   };
   $('.dotmatix_samples').multiselect(multiConfigurationSet);
+  var remove_html = '<tbody><tr><td></td><td><p>No resources available!</p></td> <td></td><td></td><td></td><td></td><td></td></tr></tbody>';
+  
+  
+  $(".deletescript").click(function(ev) {
+    ev.preventDefault(); // prevent navigation
+    var par = $(this).data("param");
+    var category = $(this).data("cate");
+    var parent = $(this).parent().parent();
+    bootbox.dialog({
+    message: "Are you sure about removing this app? ",
+    title: "Warning",
+    buttons: {
+    success: {
+    label: "Cancel",
+    className: "btn-success",
+    callback: function() {
+    //console.log("success");
+    }
+    },
+    danger: {
+    label: "Sure",
+    className: "btn-danger",
+    callback: function() {
+        $.ajax({
+          type: "POST",
+          url: par,
+          data: {"category": category},
+          //dataType: "json",
+          //cache: false,
+          success: function(response){
+              if(response['delete']=='Yes'){
+                  if(response['count_app']==1){
+                      parent.fadeOut('slow', function(){
+                                        $(this).parent().after(remove_html);
+                                        $(this).parent().remove();
 
+                                    });
+                  }else{
+                      parent.fadeOut('slow', function(){$(this).remove();});
+                  }
+              }
+      
+          },
+          error: function (request, status, error) {
+                      //implement proper error handling
+                      console.log("failure");
+                      //console.log(request.responseText);
+          }
+        });
+    //Example.show("uh oh, look out!");
+    }
+    }
+    }
+    });
+    
+  });
 
 
   $(".describe").click(function(ev) {

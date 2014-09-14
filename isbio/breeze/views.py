@@ -16,6 +16,8 @@ from django.conf import settings
 from multiprocessing import Process
 from django.utils import simplejson
 from dateutil.relativedelta import relativedelta
+from django.views.decorators.csrf import ensure_csrf_cookie
+from django.views.decorators.csrf import csrf_exempt
 
 import xml.etree.ElementTree as xml
 import shell as rshell
@@ -395,13 +397,37 @@ def deletefree(request):
     #print(sid)
     try:
         items = CartInfo.objects.filter(type_app = True)
-        print(items)
+        #print(items)
         for each_item in items:
-            print("hi")
+            #print("hi")
             each_item.access.add(request.user)
         items.delete()
         #print("he")
         return HttpResponse(simplejson.dumps({"delete": "Yes"}), mimetype='application/json')
+    except CartInfo.DoesNotExist:
+        return HttpResponse(simplejson.dumps({"delete": "No"}), mimetype='application/json')
+        
+#@login_required(login_url='/')
+#@ensure_csrf_cookie
+@csrf_exempt
+def deletescript(request, sid=None):
+    #print(sid)
+    #print(request.POST['category'])
+    try:
+        scr=Rscripts.objects.get(id=sid)
+        all_scripts = request.user.users.all()
+        #print("hi")
+        if(request.POST['category']=="all"):
+            count_app = request.user.users.all().count()
+            #print(count_app)
+        elif(request.POST['category']=="reports"):
+            count_app = all_scripts.filter(istag="1").count()
+            #print(count_app)
+        else:
+            count_app = all_scripts.filter(category=request.POST['category'].lower(), istag="0", draft="0").count()
+        
+        scr.access.remove(request.user)
+        return HttpResponse(simplejson.dumps({"delete": "Yes", "count_app": count_app}), mimetype='application/json')
     except CartInfo.DoesNotExist:
         return HttpResponse(simplejson.dumps({"delete": "No"}), mimetype='application/json')
         
