@@ -102,7 +102,7 @@
                             <td></td><td></td><td></td><td></td><td></td>
                             <td style="vertical-align: middle" align="right">
                               
-                              <a href="#" class="btn btn-success installall"   data-param="#">
+                              <a href="#" class="btn btn-success install_all_free"   data-param="installfree">
                                    <strong>All&nbsp;<i class="icon-black icon-download-alt"></i></strong>
                                 
                               </a>
@@ -294,7 +294,7 @@ $(document).ready(function() {
     
   });
   
-
+  var remove_html = '<tbody><tr><td></td><td><p>No resources available!</p></td> <td></td><td></td><td></td><td></td><td></td></tr></tbody>';
   
   
   $(".deleteall").click(function(ev) {
@@ -345,12 +345,67 @@ $(document).ready(function() {
     
   });
   
-  
+  $(".install_all_free").click(function(ev){
+    ev.preventDefault(); // prevent navigation
+    var par = $(this).data("param");
+    var parent = $(this).parent().parent().parent();
+    bootbox.dialog({
+    message: "Install all for free ",
+    title: "Agreement",
+    buttons: {
+    success: {
+    label: "Cancel",
+    className: "btn-danger",
+    callback: function() {
+    //console.log("success");
+    }
+    },
+    danger: {
+    label: "Sure",
+    className: "btn-success",
+    callback: function() {
+        $.ajax({
+          type: "GET",
+          url: par,
+          success: function(response){
+              if(response['delete']=='Yes'){
+                  bootbox.dialog({
+                  message: "All apps have been installed! ",
+                  title: "Information",
+                  buttons: {
+                  success: {
+                  label: "OK",
+                  className: "btn-success",
+                  callback: function() {
+                      parent.fadeOut('slow', function(){
+                                        $(this).after(remove_html);
+                                        $(this).remove();
+                                    });
+                  //console.log("success");
+                  }
+                  }
+                  }
+                  });
+              }
+          },
+          error: function (request, status, error) {
+                      //implement proper error handling
+                      console.log(status);
+                      //console.log(request.responseText);
+          }
+        });
+    //Example.show("uh oh, look out!");
+    }
+    }
+    }
+    });
+    
+    
+  });
   $(".installapp").click(function(ev) {
     ev.preventDefault(); // prevent navigation
     var par = $(this).data("param");
     var parent = $(this).parent().parent();
-    console.log(par);
     bootbox.dialog({
     message: "Install it for free ",
     title: "Agreement",
@@ -371,7 +426,6 @@ $(document).ready(function() {
           url: par,
           //data: {"hello": par},
           success: function(response){
-              //console.log(response)
               if(response['install_status']=='exist'){
                   bootbox.dialog({
                   message: "You have already installed this app! ",
@@ -396,6 +450,19 @@ $(document).ready(function() {
                   }
                   });
               }
+              if(response['install_status']=='Yes'){
+                  
+                          if(response['count_app']==1){
+                              
+                              parent.fadeOut('slow', function(){
+                                                $(this).parent().after(remove_html);
+                                                $(this).parent().remove();
+                                            });
+                          } else { 
+                             
+                              parent.fadeOut('slow', function(){$(this).remove();});
+                                  }
+              } 
           },
           error: function (request, status, error) {
                       //implement proper error handling

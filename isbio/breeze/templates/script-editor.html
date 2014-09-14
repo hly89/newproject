@@ -134,7 +134,10 @@
                 <label class="control-label" for="id_DATE">Modified</label>
                 <div class="controls"><input id="id_DATE" class="input-medium" type="text" value="&nbsp;{{ script.creation_date }}" disabled></div>
               </div>
-
+              <div class="control-group">
+                  <label class="control-label" for="id_Author">Author</label>
+                  <div class="controls"><input id="id_Author" class="input-medium" type="text" value="&nbsp;{{ script.author }}" disabled></div>
+              </div>
               {{ attr_form|as_bootstrap }}
 
               <button class="btn btn-primary pull-right" type="submit"><strong>Update</strong></button>

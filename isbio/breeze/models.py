@@ -72,6 +72,8 @@ class ReportType(models.Model):
 class Script_categories(models.Model):
     category = models.CharField(max_length=55, unique=True)
     description = models.CharField(max_length=350, blank=True)
+    # if the script is a drat then the category should be inactive
+    #active = models.BooleanField(default=False)
     
     def __unicode__(self):
         return self.category
@@ -85,7 +87,7 @@ class Rscripts(models.Model):
     author = ForeignKey(User)
     creation_date = models.DateField(auto_now_add=True)
     draft = models.BooleanField(default=True)
-    price = models.DecimalField(max_digits=19, decimal_places=2)
+    price = models.DecimalField(max_digits=19, decimal_places=2, default=0.00)
     # tag related
     istag = models.BooleanField(default=False)
     must = models.BooleanField(default=False)  # defines wheather the tag is enabled by default

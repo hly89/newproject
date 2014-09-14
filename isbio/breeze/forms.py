@@ -349,7 +349,7 @@ class ScriptDescription(forms.Form):
 class ScriptAttributes(forms.ModelForm):
     class Meta:
         model = breeze.models.Rscripts
-        fields = ('author', 'category', 'price', 'draft', 'istag', 'report_type')
+        fields = ('category', 'price', 'draft', 'istag', 'report_type')
 
 class ScriptLogo(forms.Form):
     logo = forms.FileField(label=(u''))

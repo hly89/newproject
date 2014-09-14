@@ -206,8 +206,9 @@ def scripts(request, layout="list"):
     cat_list = dict()
     cate = list()
     for each_cate in categories:
-        cat_list[str(each_cate.category).capitalize()] = all_scripts.filter(category=each_cate, istag="0", draft="0")
-        cate.append(str(each_cate.category).capitalize())
+        if all_scripts.filter(category=each_cate, istag="0", draft="0").count() > 0:
+            cat_list[str(each_cate.category).capitalize()] = all_scripts.filter(category=each_cate, istag="0", draft="0")
+            cate.append(str(each_cate.category).capitalize())
     
     cat_list['reports'] = all_scripts.filter(istag="1")
     #report_types = ReportType.objects.filter(access=request.user)
@@ -382,16 +383,30 @@ def install(request, sid=None):
             
             cate = CartInfo.objects.get(product = sid).type_app
             items.access.add(request.user)
-
+            count_app = CartInfo.objects.filter(type_app=cate).count()
             # delete this app from cart
             CartInfo.objects.get(product = sid).delete()
-            count_app = CartInfo.objects.filter(type_app=cate).count()
             return HttpResponse(simplejson.dumps({"install_status": "Yes", 'count_app': count_app}), mimetype='application/json')
     except CartInfo.DoesNotExist:
         return HttpResponse(simplejson.dumps({"install_status": "No"}), mimetype='application/json')
     
 @login_required(login_url='/')
 def deletefree(request):
+    #print(sid)
+    try:
+        items = CartInfo.objects.filter(type_app = True)
+        print(items)
+        for each_item in items:
+            print("hi")
+            each_item.access.add(request.user)
+        items.delete()
+        #print("he")
+        return HttpResponse(simplejson.dumps({"delete": "Yes"}), mimetype='application/json')
+    except CartInfo.DoesNotExist:
+        return HttpResponse(simplejson.dumps({"delete": "No"}), mimetype='application/json')
+        
+@login_required(login_url='/')
+def installfree(request):
     #print(sid)
     try:
         items = CartInfo.objects.filter(type_app = True)
@@ -634,8 +649,9 @@ def store(request):
     cat_list = dict()
     #categories = list()
     for each_cate in categories:
-        cat_list[str(each_cate.category).capitalize()] = Rscripts.objects.filter(category=each_cate, istag="0", draft="0")
-        cate.append(str(each_cate.category).capitalize())
+        if Rscripts.objects.filter(category=each_cate, istag="0", draft="0").count() > 0:
+            cat_list[str(each_cate.category).capitalize()] = Rscripts.objects.filter(category=each_cate, istag="0", draft="0")
+            cate.append(str(each_cate.category).capitalize())
     
     cat_list['reports'] = Rscripts.objects.filter(istag="1")
     '''
@@ -1280,7 +1296,7 @@ def new_script_dialog(request):
         sname = str(form.cleaned_data.get('name', None))
         sinline = str(form.cleaned_data.get('inline', None))
         newpath = rshell.init_script(sname, sinline, request.user)
-        print("hello!")
+        #print(newpath)
         return HttpResponseRedirect('/resources/scripts/')
 
     return render_to_response('forms/basic_form_dialog.html', RequestContext(request, {

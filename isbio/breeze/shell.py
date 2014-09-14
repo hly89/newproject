@@ -18,11 +18,11 @@ logger = logging.getLogger(__name__)
 
 def init_script(name, inline, person):
     spath = str(settings.MEDIA_ROOT) + str(get_folder_name("scripts" , name, None))
-
+    #print(spath)
     if not os.path.isdir(spath):
         os.makedirs(spath)
  
-        dbitem = breeze.models.Rscripts(name=name, inln=inline, author=person, details="empty", order=0, category_id="general")
+        dbitem = breeze.models.Rscripts(name=name, inln=inline, author=person, details="empty", order=0, category_id="general", price=0.00)
 
         # create empty files for header, code and xml
         dbitem.header.save('name.txt', base.ContentFile('# write your header here...'))
