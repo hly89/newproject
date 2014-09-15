@@ -95,7 +95,7 @@
               <table class="table table-striped">
                 <head>
                   <tr>
-                    <th>Logo</th> <th>Name</th> <th>Inline Description</th><th>Detials</th>
+                    <th>Logo</th> <th>Name</th> <th>Inline Description</th><th>Installed Date</th><th>Detials</th>
                     <th>Action</th><th>Delete</th>
                   </tr>
                 </head>
@@ -106,6 +106,13 @@
                     <td style="vertical-align: middle"><img {% if scr.logo %} src="/media/{{ scr.logo }}" {% else %} src="/static/logos/rlogo.jpg" {% endif %} width="55" height="55" class="img-rounded"></td>
                     <td style="vertical-align: middle"><strong>{{ scr.name }} <br /> <span class="subscript"> (author: {{ scr.author }}) </span> </strong></td>
                     <td style="vertical-align: middle"><i>{{ scr.inln|truncatewords:9|default:"No Inline" }}</i></td>
+                    <td style="vertical-align: middle">
+                        {% for each in scr.install_date.all %}
+                            {% if each.user == request.user %}
+                                <i>{{ each.install_date }}</i>
+                            {% endif %}
+                        {% endfor %}
+                    </td>
                     <td style="vertical-align: middle">
                       <a href="#" data-toggle="modal" class="btn btn-primary describe" data-target="#Describe" data-param={{ scr.id }}>
                         <i class="icon-info-sign icon-white"></i>

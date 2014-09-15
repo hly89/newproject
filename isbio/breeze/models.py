@@ -77,6 +77,13 @@ class Script_categories(models.Model):
     
     def __unicode__(self):
         return self.category
+        
+class User_date(models.Model):
+    user = ForeignKey(User)
+    install_date = models.DateField(auto_now_add=True)
+    
+    def __unicode__(self):
+        return self.user.username
 
 class Rscripts(models.Model):
     name = models.CharField(max_length=35, unique=True)
@@ -95,6 +102,8 @@ class Rscripts(models.Model):
     report_type = models.ManyToManyField(ReportType, null=True, blank=True, default=None)  # assosiation with report type
     #report_type = models.ForeignKey(ReportType, null=True, blank=True, default=None)  # assosiation with report type
     access = models.ManyToManyField(User, null=True, blank=True, default=None, related_name="users")
+    #install date info
+    install_date = models.ManyToManyField(User_date, blank=True, null=True, default=None, related_name="installdate")
     def file_name(self, filename):
         fname, dot, extension = filename.rpartition('.')
         slug = slugify(self.name)
