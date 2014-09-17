@@ -170,7 +170,7 @@
                 </head>
                 <tbody>
                   {% for scr in scr_list %}
-                  <tr>
+                  <tr id={{ scr.id }}>
                     <td style="vertical-align: middle"><img {% if scr.logo %} src="/media/{{ scr.logo }}" {% else %} src="/static/logos/rlogo.jpg" {% endif %} width="55" height="55" class="img-rounded"></td>
                     <td style="vertical-align: middle"><strong>{{ scr.name }} <br /> <span class="subscript"> (author: {{ scr.author }}) </span> </strong></td>
                     <td style="vertical-align: middle"><i>{{ scr.inln|truncatewords:9|default:"No Inline" }}</i></td>
@@ -298,6 +298,7 @@ $(document).ready(function() {
           //cache: false,
           success: function(response){
               if(response['delete']=='Yes'){
+                  
                   if(response['count_app']==1){
                       parent.fadeOut('slow', function(){
                                         $(this).parent().after(remove_html);

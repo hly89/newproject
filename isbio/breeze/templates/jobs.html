@@ -141,7 +141,7 @@
                 <td id="{{ job.id }}_list_td">{{ job.progress }} %</td>
                 <td></td>
                 <td></td>
-                <td><a href="#" class="btn btn-danger">Abort</a></td>
+                <td><a href="#" class="btn btn-danger abort" data-param="/abortjobs/{{job.id}}">Abort</a></td>
                 <td></td><td></td><td></td>
               </tr>
               {% endfor %}
@@ -198,6 +198,52 @@
       updateJobs(par, itm);
     });
 
+    });
+    $(".abort").click(function(ev){
+        ev.preventDefault(); // prevent navigation
+        var par = $(this).data("param");
+        var parent = $(this).parent().parent();
+        console.log(par)
+        bootbox.dialog({
+        message: "Are you sure about aborting this job? ",
+        title: "Warning",
+        buttons: {
+        success: {
+        label: "Cancel",
+        className: "btn-success",
+        callback: function() {
+        //console.log("success");
+        }
+        },
+        danger: {
+        label: "Sure",
+        className: "btn-danger",
+        callback: function() {
+            $.ajax({
+              type: "GET",
+              url: par,
+              //data: {"hello": par},
+              success: function(response){
+                  //if(response['count_app']==1){parent.fadeOut('slow', function(){
+                    //  $(this).parent().after('<tbody><tr><td></td><td><p>No resources available!</p></td> <td></td><td></td><td></td><td></td><td></td></tr></tbody>');
+                    //  $(this).parent().remove();
+
+                  //});} else 
+                  //{parent.fadeOut('slow', function(){$(this).remove();});}
+                  //parent.fadeOut('slow', function(){$(this).remove();});
+              },
+              error: function (request, status, error) {
+                          //implement proper error handling
+                          console.log(request);
+                          //console.log(request.responseText);
+              }
+            });
+        //Example.show("uh oh, look out!");
+        }
+        }
+        }
+        });
+        
     });
     $(".rtext").click(function(ev) {
         ev.preventDefault(); // prevent navigation

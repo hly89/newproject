@@ -8,6 +8,7 @@ from django.core.files import File
 from django.core.servers.basehttp import FileWrapper
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.template.context import RequestContext
+from django.template.loader import render_to_string
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render_to_response
 from django.contrib.auth.decorators import login_required, permission_required
@@ -400,13 +401,12 @@ def install(request, sid=None):
     
 @login_required(login_url='/')
 def deletefree(request):
+    print("hello!")
     #print(sid)
     try:
         items = CartInfo.objects.filter(type_app = True)
-        #print(items)
-        for each_item in items:
-            #print("hi")
-            each_item.access.add(request.user)
+        #products = CartInfo.objects.filter(type_app = True).values()
+        print(items)
         items.delete()
         #print("he")
         return HttpResponse(simplejson.dumps({"delete": "Yes"}), mimetype='application/json')
@@ -460,7 +460,7 @@ def deletenonfree(request):
     try:
         items = CartInfo.objects.filter(type_app = False)
         items.delete()
-        #print("he")
+ 
         return HttpResponse(simplejson.dumps({"delete": "Yes"}), mimetype='application/json')
     except CartInfo.DoesNotExist:
         return HttpResponse(simplejson.dumps({"delete": "No"}), mimetype='application/json')
@@ -680,10 +680,28 @@ def dochelp(request):
     return render_to_response('help.html', RequestContext(request, {'help_status': 'active'}))
 
 @login_required(login_url='/')
+def abortjobs(request, jid=None):
+    try:
+        abortjob = Jobs.objects.get(id=jid)
+        abortjob.status = "abort"
+        abortjob.save()
+        return HttpResponse(simplejson.dumps({"abort": "Yes"}), mimetype='application/json')
+    except CartInfo.DoesNotExist:
+        return HttpResponse(simplejson.dumps({"abort": "No"}), mimetype='application/json')
+    
+
+@login_required(login_url='/')
 def store(request):
     categories = Script_categories.objects.all()
     cate = list()
     scripts = Rscripts.objects.filter(draft="0", istag="0")
+    count_app = CartInfo.objects.all().count()
+    if count_app == 1:
+        apps = 'app'
+    elif count_app > 1:
+        apps = 'apps'
+    else:
+        apps = ''
     cat_list = dict()
     #categories = list()
     for each_cate in categories:
@@ -702,22 +720,34 @@ def store(request):
         'store_status': 'active',
         'cate': cate,
         'script_list': scripts,
-        'cat_list': sorted(cat_list.iteritems())
+        'cat_list': sorted(cat_list.iteritems()),
+        'count_mycart': count_app,
+        'apps':apps
     }))
     
 @login_required(login_url='/')
 def mycart(request):
-    
-    #print(stype)
-    all_items = CartInfo.objects.filter(script_buyer=request.user)
+    print("ha!")
+    #all_items = CartInfo.objects.filter(script_buyer=request.user)
     items_free = CartInfo.objects.filter(script_buyer=request.user, type_app=True)
     items_nonfree = CartInfo.objects.filter(script_buyer=request.user, type_app=False)
-    return render_to_response('cart.html', RequestContext(request, {
-        'mycart_status': 'active',
+    html = render_to_string('cartinfo.html', {
+        #'mycart_status': 'active',
         'items_free': items_free,
-        'items_nonfree': items_nonfree,
-        'all_items': all_items 
-    }))
+        'items_nonfree': items_nonfree
+        #'all_items': all_items 
+    })
+    return HttpResponse(html)
+    
+@login_required(login_url='/')
+def updatecart(request):
+    count_mycart = CartInfo.objects.filter(script_buyer=request.user).count()
+    html = render_to_string('countcart.html', {'count_mycart': count_mycart})
+    return HttpResponse(html)
+    #return render_to_response('base.html', RequestContext(request, {
+        #'count_mycart': count_mycart,
+        #'store_status': 'active'
+    #}))
 
 ######################################
 ###      SUPPLEMENTARY VIEWS       ###
@@ -1280,14 +1310,14 @@ def update_jobs(request, jid, item):
         sge_status = rshell.track_sge_job(Jobs.objects.get(id=jid))
         # request job instance again to be sure that the data is updated
         job = Jobs.objects.get(id=jid)
-
+        
         response = dict(id=job.id, name=str(job.jname), staged=str(job.staged), status=str(job.status), progress=job.progress, sge=sge_status)
     else:
         sge_status = rshell.track_sge_job(Report.objects.get(id=jid))
         # request job instance again to be sure that the data is updated
         report = Report.objects.get(id=jid)
         #report = rshell.run_report(report)
-        report.status = "success"
+        report.status = "succeed"
         response = dict(id=report.id, name=str(report.name), staged=str(report.created), status=str(report.status), progress=report.progress, sge=sge_status)
 
 
