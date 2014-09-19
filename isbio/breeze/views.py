@@ -86,6 +86,7 @@ def base(request):
 @login_required(login_url='/')
 def home(request, state="feed"):
     occurrences = dict()
+    print(state)
     if state == 'feed' or state == None:
         menu = 'feed_menu'
         show_menu = 'show_feed'
@@ -102,6 +103,8 @@ def home(request, state="feed"):
         explorer_pane = 'show_datasets'
         pref_tab = 'projects_tab'
         pref_pane = 'show_projects'
+        stat_tab = 'analysis_stat_tab'
+        stat_pane = 'show_analysis_stat'
     elif state == 'groups':
         menu = 'preferences_menu'
         show_menu = 'show_preferences'
@@ -109,6 +112,8 @@ def home(request, state="feed"):
         explorer_pane = 'show_datasets'
         pref_tab = 'usergroups_tab'
         pref_pane = 'show_usergroups'
+        stat_tab = 'analysis_stat_tab'
+        stat_pane = 'show_analysis_stat'
 
     projects = Project.objects.exclude(~Q(author__exact=request.user) & Q(collaborative=False)).order_by("name")
     groups = Group.objects.filter(author__exact=request.user).order_by("name")
@@ -152,24 +157,26 @@ def home(request, state="feed"):
 
 @login_required(login_url='/')
 def jobs(request, state="scheduled"):
+    print(request)
     if state == "scheduled":
         tab = "scheduled_tab"
         show_tab = "show_sched"
     else:
         tab = "history_tab"
         show_tab = "show_hist"
-
+    # sheduled scripts
     scheduled_jobs = Jobs.objects.filter(juser__exact=request.user).filter(status__exact="scheduled").order_by("-id")
     history_jobs = Jobs.objects.filter(juser__exact=request.user).exclude(status__exact="scheduled").exclude(status__exact="active").order_by("-id")
     active_jobs = Jobs.objects.filter(juser__exact=request.user).filter(status__exact="active").order_by("-id")
     active_reports = Report.objects.filter(status="active").filter(author__exact=request.user).order_by('-created')
     merged_active = aux.merge_job_history(active_jobs, active_reports)
-    # ready_reports = Report.objects.filter(status="succeed").filter(author__exact=request.user).order_by('-created')
-    ready_reports = Report.objects.exclude(status="active").filter(author__exact=request.user).order_by('-created')
+    ready_reports = Report.objects.filter(author__exact=request.user).exclude(status__exact="scheduled").exclude(status__exact="active").order_by('-created')
+    #ready_reports = Report.objects.exclude(status="active").filter(author__exact=request.user).order_by('-created')
 
-    merged_history = aux.merge_job_history(history_jobs, ready_reports)
+    #merged_history = aux.merge_job_history(history_jobs, ready_reports)
 
-    paginator = Paginator(merged_history,15)  # show 15 items per page
+    #paginator = Paginator(merged_history,15)  # show 15 items per page
+    paginator = Paginator(history_jobs,15)
 
     # If AJAX - check page from the request
     # Otherwise ruturn the first page
@@ -191,8 +198,11 @@ def jobs(request, state="scheduled"):
             'jobs_status': 'active',
             'dash_history': hist_jobs[0:3],
             'scheduled': scheduled_jobs,
-            'history': hist_jobs,
-            'current': merged_active,
+            'history_script': history_jobs,
+            'history_report': ready_reports,
+            #'current': merged_active,
+            'current_script': active_jobs,
+            'current_report': active_reports,
             'pagination_number': paginator.num_pages
         }))
 
@@ -238,8 +248,12 @@ def scripts(request, layout="list"):
 
 @login_required(login_url='/')
 def reports(request):
+    print("i am here")
     all_reports = Report.objects.filter(status="succeed").order_by('-created')
     report_type_lst = ReportType.objects.filter(access=request.user)
+    # later all_users will be changed to all users from the same insitute
+    all_users = User.objects.all()
+    all_projects = Project.objects.all()
     paginator = Paginator(all_reports,30)  # show 3 items per page
 
     # If AJAX - check page from the request
@@ -252,7 +266,7 @@ def reports(request):
             reports = paginator.page(1)
         except EmptyPage:  # if page out of bounds
             reports = paginator.page(paginator.num_pages)
-
+            print("i love u!")
         return render_to_response('reports-paginator.html', RequestContext(request, { 'reports': reports }))
     else:
         reports = paginator.page(1)
@@ -260,6 +274,8 @@ def reports(request):
             'reports_status': 'active',
             'reports': reports,
             'rtypes': report_type_lst,
+            'users': all_users,
+            'projects': all_projects,
             'pagination_number': paginator.num_pages
         }))
 
@@ -498,6 +514,7 @@ def ajax_user_stat(request):
     
     return HttpResponse(simplejson.dumps(response_data), mimetype='application/json')
 
+#@csrf_exempt
 def reports_search(request):
     query_string = ''
     found_entries = None
@@ -511,6 +528,7 @@ def reports_search(request):
     return render_to_response('search/search_results.html',
                           { 'query_string': query_string, 'found_entries': found_entries },
                           context_instance=RequestContext(request))
+
 
 @login_required(login_url='/')
 def report_overview(request, rtype, iname, iid=None, mod=None):
@@ -1004,9 +1022,9 @@ def create_job(request, sid=None):
     script_name = str(script.name)  # tree.getroot().attrib['name']
     script_inline = script.inln
     user_info = User.objects.get(username=request.user)
-
+    print(request.method)
     if request.method == 'POST':
-
+        # after fill the forms for creating the new job
         head_form = breezeForms.BasicJobForm(request.user, None, request.POST)
         custom_form = breezeForms.form_from_xml(xml=tree, req=request, usr=request.user)
 
@@ -1016,7 +1034,7 @@ def create_job(request, sid=None):
             new_job.jname = head_form.cleaned_data['job_name']
             new_job.jdetails = head_form.cleaned_data['job_details']
             new_job.script = script
-            new_job.status = "scheduled"
+            new_job.status = request.POST['job_status']
             new_job.juser = request.user
             new_job.progress = 0
 
@@ -1046,6 +1064,8 @@ def create_job(request, sid=None):
             if 'run_job' in request.POST:
                 p = Process( target=rshell.run_job, args=(new_job,) )
                 p.start()
+                #print("running jobs")
+            #return HttpResponseRedirect('/home/')
             return HttpResponseRedirect('/jobs/')
     else:
         head_form = breezeForms.BasicJobForm(user=request.user, edit=None)
@@ -1423,8 +1443,9 @@ def new_project_dialog(request):
         This view provides a dialog to create a new Project in DB.
     """
     project_form = breezeForms.NewProjectForm(request.POST or None)
-
+    print("first time")
     if project_form.is_valid():
+        print("second time")
         aux.save_new_project(project_form, request.user)
         return HttpResponseRedirect('/home/projects')
 
@@ -1514,18 +1535,24 @@ def edit_group_dialog(request, gid):
 @login_required(login_url='/')
 def update_user_info_dialog(request):
     user_info = User.objects.get(username=request.user)
-
+    user_details = UserProfile.objects.get(user=user_info.id)
+    #print(request.method)
     if request.method == 'POST':
         personal_form = breezeForms.PersonalInfo(request.POST)
         if personal_form.is_valid():
             user_info.first_name = personal_form.cleaned_data.get('first_name', None)
             user_info.last_name = personal_form.cleaned_data.get('last_name', None)
             user_info.email = personal_form.cleaned_data.get('email', None)
+            user_details.fimm_group = personal_form.cleaned_data.get('group', None)
+            user_details.institute = personal_form.cleaned_data.get('institute', None)
+            #print(user_details.group)
             user_info.save()
+            user_details.save()
             return HttpResponseRedirect('/home/')
 
     else:
-        personal_form = breezeForms.PersonalInfo(initial={'first_name': user_info.first_name, 'last_name': user_info.last_name, 'email': user_info.email })
+        print(user_details.institute)
+        personal_form = breezeForms.PersonalInfo(initial={'first_name': user_info.first_name, 'last_name': user_info.last_name, 'email': user_info.email, 'group': user_details.fimm_group, 'institute': user_details.institute })
 
     return render_to_response('forms/basic_form_dialog.html', RequestContext(request, {
         'form': personal_form,
@@ -1537,21 +1564,47 @@ def update_user_info_dialog(request):
 
 @login_required(login_url='/')
 def report_search(request):
+    #print("haha")
     query_string = ''
     found_entries = None
+    entry_query = None
     # report_type_lst = ReportType.objects.all()
-
+    #print(request.POST)
     if 'reset' in request.POST:
         all_reports = Report.objects.filter(status="succeed").order_by('-created')
         paginator = Paginator(all_reports,30)
         found_entries = paginator.page(1)
+    else:
+        if ('filt_name' in request.POST) and request.POST['filt_name'].strip():
+            query_string = request.POST['filt_name']
+            entry_query = aux.get_query(query_string, ['name'])
+            #print(entry_query)
+            #found_entries = Report.objects.filter(entry_query, status="succeed").order_by('-created')
+        # filter by type
+        if ('filt_type' in request.POST) and request.POST['filt_type']:
+        #print("ok")
+            query_type = request.POST['filt_type']
+            if entry_query:
+                entry_query = entry_query & aux.get_query_new(query_type, ['type__type'])
+            else:
+                entry_query = aux.get_query_new(query_type, ['type__type'])
+        # filter by author
+        if ('filt_author' in request.POST) and request.POST['filt_author']:
+            query_type = request.POST['filt_author']
+            if entry_query:
+                entry_query = entry_query & aux.get_query_new(query_type, ['author__username'])
+            else:
+                entry_query = aux.get_query_new(query_type, ['author__username'])
+        # filter by project
+        if ('filt_project' in request.POST) and request.POST['filt_project']:
+            query_type = request.POST['filt_project']
+            if entry_query:
+                entry_query = entry_query & aux.get_query_new(query_type, ['project__name'])
+            else:
+                entry_query = aux.get_query_new(query_type, ['project__name'])
+        found_entries = Report.objects.filter(entry_query, status="succeed").order_by('-created')
 
-    if ('filt_name' in request.POST) and request.POST['filt_name'].strip():
-        query_string = request.POST['filt_name']
-
-        entry_query = aux.get_query(query_string, ['name'])
-        found_entries = Report.objects.filter(entry_query).filter(status="succeed").order_by('-created')
-
+    print(entry_query)
     return render_to_response('reports-paginator.html', RequestContext(request, {
         'reports': found_entries
     }))

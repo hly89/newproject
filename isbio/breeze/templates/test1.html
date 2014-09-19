@@ -1,0 +1,197 @@
+
+    <div class="tabbable active" id="scripts">
+      <!-- Tabs' Header -->
+      <ul class="nav nav-tabs" id="jobTabs">
+        <li class="{{ history_tab }}"><a href="#history" data-toggle="tab">History</a></li>
+        <li class="{{ scheduled_tab }}" ><a href="#scheduled" data-toggle="tab">Scheduled</a></li>
+        <li class="{{ current_tab }}"><a href="#current" data-toggle="tab">In Progress</a></li>
+      </ul>
+      <!-- Tabs' Content -->
+      <div class="tab-content">
+        <!-- HISTORY -->
+        <div class="tab-pane {{ show_hist }}" id="history" style="padding-bottom: 250px">
+          <table class="table table-striped">
+            <head>
+              <tr>
+                <th>Finished</th>
+                <th>Job Name</th>
+                <th></th>
+                <th>Status</th>
+                <th>Download</th>
+                <th>Misc</th>
+                <th>Delete</th>
+              </tr>
+            </head>
+            <tbody id="history_top">
+              {% include "jobs-hist-paginator.html" %}
+            </tbody>
+          </table>
+          <p><br>&nbsp;<br></p>
+          <div id="paginator_control"></div>
+        </div>
+        <!-- SCHEDULED -->
+        <div class="tab-pane {{ show_sched }}" id="scheduled" style="padding-bottom: 250px">
+          <table class="table table-striped">
+            <head>
+              <tr>
+                <th>Scheduled</th>
+                <th>Job Name</th>
+                <th></th>
+                <th></th>
+                <th>RUN</th>
+                <th>Revise</th>
+                <th>Edit</th>
+                <th>Delete</th>
+              </tr>
+            </head>
+            <tbody>
+              {% for job in scheduled %}
+              <tr>
+                <td>{{ job.staged }}</td>
+                <td>{{ job.jname }}</td>
+                <td></td>
+                <td></td>
+                <td><a href="/jobs/run/{{ job.id }}" class="btn btn-success"> <i class="icon-play-circle"></i></a></td>
+                <td><a href="#" data-toggle="modal" class="btn btn-inverse rtext" data-target="#script"  data-param={{ job.id }}><i class="icon-white icon-info-sign"></i></a></td>
+                <td><a href="#" data-toggle="modal" class="btn btn-inverse apply" data-target="#Apply"  data-param={{ job.id }}><i class="icon-white icon-edit"></i></a></td>
+                <td><a href="#" data-toggle="modal" class="btn btn-danger" data-target="#Del" onclick="$('#del_btn').attr('href', '/jobs/delete/{{ job.id }}'); $('#del_title').text('{{ job.jname }}');" >
+                      <i class="icon-trash"></i>
+                    </a>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        <!-- CURRENT -->
+        <div class="tab-pane {{ show_curr }}" id="current" style="padding-bottom: 250px">
+          <table class="table table-striped">
+            <head>
+              <tr>
+                <th>Triggered</th>
+                <th>Job Name</th>
+                <th>Progress</th>
+                <th></th>
+                <th></th>
+                <th>Actions:</th>
+                <th></th>
+                <th></th>
+                <th></th>
+              </tr>
+            </head>
+            <tbody>
+              {% for job in current %}
+              <tr id="{{ job.id }}_list_tr">
+                <td>{{ job.staged }}</td>
+                <td>{{ job.jname }}</td>
+                <td id="{{ job.id }}_list_td">{{ job.progress }} %</td>
+                <td></td>
+                <td></td>
+                <td><a href="#" class="btn btn-danger abort" data-param="/abortjobs/{{job.id}}">Abort</a></td>
+                <td></td><td></td><td></td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <!-- END of Tabs' Content -->
+    </div>
+    <div class="tabbable" id="reports">
+      <!-- Tabs' Header -->
+      <ul class="nav nav-tabs" id="jobTabs">
+        <li class="{{ history_tab }}"><a href="#history" data-toggle="tab">History</a></li>
+        <li class="{{ scheduled_tab }}" ><a href="#scheduled" data-toggle="tab">Scheduled</a></li>
+        <li class="{{ current_tab }}"><a href="#current" data-toggle="tab">In Progress</a></li>
+      </ul>
+      <!-- Tabs' Content -->
+      <div class="tab-content">
+        <!-- HISTORY -->
+        <div class="tab-pane {{ show_hist }}" id="history" style="padding-bottom: 250px">
+          <table class="table table-striped">
+            <head>
+              <tr>
+                <th>Finished</th>
+                <th>Job Name</th>
+                <th></th>
+                <th>Status</th>
+                <th>Download</th>
+                <th>Misc</th>
+                <th>Delete</th>
+              </tr>
+            </head>
+            <tbody id="history_top">
+              {% include "jobs-hist-paginator.html" %}
+            </tbody>
+          </table>
+          <p><br>&nbsp;<br></p>
+          <div id="paginator_control"></div>
+        </div>
+        <!-- SCHEDULED -->
+        <div class="tab-pane {{ show_sched }}" id="scheduled" style="padding-bottom: 250px">
+          <table class="table table-striped">
+            <head>
+              <tr>
+                <th>Scheduled</th>
+                <th>Job Name</th>
+                <th></th>
+                <th></th>
+                <th>RUN</th>
+                <th>Revise</th>
+                <th>Edit</th>
+                <th>Delete</th>
+              </tr>
+            </head>
+            <tbody>
+              {% for job in scheduled %}
+              <tr>
+                <td>{{ job.staged }}</td>
+                <td>{{ job.jname }}</td>
+                <td></td>
+                <td></td>
+                <td><a href="/jobs/run/{{ job.id }}" class="btn btn-success"> <i class="icon-play-circle"></i></a></td>
+                <td><a href="#" data-toggle="modal" class="btn btn-inverse rtext" data-target="#script"  data-param={{ job.id }}><i class="icon-white icon-info-sign"></i></a></td>
+                <td><a href="#" data-toggle="modal" class="btn btn-inverse apply" data-target="#Apply"  data-param={{ job.id }}><i class="icon-white icon-edit"></i></a></td>
+                <td><a href="#" data-toggle="modal" class="btn btn-danger" data-target="#Del" onclick="$('#del_btn').attr('href', '/jobs/delete/{{ job.id }}'); $('#del_title').text('{{ job.jname }}');" >
+                      <i class="icon-trash"></i>
+                    </a>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        <!-- CURRENT -->
+        <div class="tab-pane {{ show_curr }}" id="current" style="padding-bottom: 250px">
+          <table class="table table-striped">
+            <head>
+              <tr>
+                <th>Triggered</th>
+                <th>Job Name</th>
+                <th>Progress</th>
+                <th></th>
+                <th></th>
+                <th>Actions:</th>
+                <th></th>
+                <th></th>
+                <th></th>
+              </tr>
+            </head>
+            <tbody>
+              {% for job in current %}
+              <tr id="{{ job.id }}_list_tr">
+                <td>{{ job.staged }}</td>
+                <td>{{ job.jname }}</td>
+                <td id="{{ job.id }}_list_td">{{ job.progress }} %</td>
+                <td></td>
+                <td></td>
+                <td><a href="#" class="btn btn-danger abort" data-param="/abortjobs/{{job.id}}">Abort</a></td>
+                <td></td><td></td><td></td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <!-- END of Tabs' Content -->
+    </div>

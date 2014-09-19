@@ -28,13 +28,10 @@
         <div class="control-group">
           <div class="controls">
             <label class="checkbox inline">
-              <input type="checkbox" id="b_id" name="Started" value="b"> Started
+              <input type="checkbox" id="b_id" name="job_status" value="scheduled"> Schedule
             </label>
             <label class="checkbox inline">
-              <input type="checkbox" id="e_id" name="Ready" value="e"> Ready
-            </label>
-            <label class="checkbox inline">
-              <input type="checkbox" id="a_id" name="Aborted" value="a"> Aborted
+              <input type="checkbox" id="e_id" name="job_status" value="active"> Run Imediately
             </label>
           </div>
         </div>
@@ -49,7 +46,7 @@
       </div>
       <div class="modal-footer">
         {% if  mode == "create" %}
-        <input class="btn btn-inverse" name="schedule_job" type="submit" value="Schedule" form="form_modal_apply"/>
+        <!--<input class="btn btn-inverse" name="schedule_job" type="submit" value="Schedule" form="form_modal_apply"/>-->
         <input class="btn btn-inverse" name="run_job" type="submit" value="Run" form="form_modal_apply"/>
         {% elif  mode == "edit" %}
         <input class="btn btn-inverse" type="submit" value="Save" />

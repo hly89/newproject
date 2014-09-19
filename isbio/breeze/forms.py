@@ -209,6 +209,15 @@ class PersonalInfo(forms.Form):
         max_length=75,
         widget=forms.TextInput(attrs={'placeholder': ' first.last@helsinki.fi ', })
     )
+    group = forms.CharField(
+        max_length=75,
+        widget=forms.TextInput(attrs={'placeholder': ' Group Name ', })
+    )
+    institute = forms.CharField(
+        max_length=75,
+        widget=forms.TextInput(attrs={'placeholder': ' Institute Name ', })
+    )
+
 
 class LoginForm(forms.Form):
     user_name = forms.CharField(

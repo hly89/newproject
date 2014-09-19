@@ -208,9 +208,10 @@ class UserProfile(models.Model):
 
     fimm_group = models.CharField(max_length=75)
     logo = models.FileField(upload_to=file_name, blank=True)
+    institute = models.CharField(max_length=75)
 
     def __unicode__(self):
-        return self.first_name
+        return self.user.first_name
 
 class Report(models.Model):
     type = models.ForeignKey(ReportType)
