@@ -138,6 +138,7 @@ class ReportPropsForm(forms.Form):
         self.fields["Share"] = forms.MultipleChoiceField(
             required=False,
             choices=share_options,
+            
             #queryset=breeze.models.User.objects.all(),
             widget=forms.SelectMultiple(
                 attrs={'class': 'multiselect', }
@@ -197,26 +198,46 @@ class RegistrationForm(forms.ModelForm):
             raise forms.ValidationError("The passowords did not match. Please try again.")
 
 class PersonalInfo(forms.Form):
-    first_name = forms.CharField(
-        max_length=55,
-        widget=forms.TextInput(attrs={'placeholder': ' First Name ', })
-    )
-    last_name = forms.CharField(
-        max_length=55,
-        widget=forms.TextInput(attrs={'placeholder': ' Last Name ', })
-    )
-    email = forms.EmailField(
+    def __init__(self, *args, **kwargs):
+
+        super(PersonalInfo, self).__init__(*args, **kwargs)
+        print(kwargs)
+        
+        self.fields['first_name'] = forms.CharField(
+            max_length=55,
+            widget=forms.TextInput(attrs={'placeholder': ' First Name ', })
+        )
+        self.fields['last_name'] = forms.CharField(
+            max_length=55,
+            widget=forms.TextInput(attrs={'placeholder': ' Last Name ', })
+        )
+        self.fields['email'] = forms.EmailField(
+            max_length=75,
+            widget=forms.TextInput(attrs={'placeholder': ' first.last@helsinki.fi ', })
+        )
+        institute_list = list()
+        for each in breeze.models.Institute.objects.all():
+            institute_list.append(tuple((each.id, each.institute)))
+        
+        self.fields['institute'] = forms.ChoiceField(
+            required=False,
+            #initial=institute_list[2],
+            choices=institute_list,
+            widget=forms.Select(
+                attrs={'class': 'multiselect', }
+            )
+        )
+        
+class NewInstitute(forms.Form):
+    name = forms.CharField(
         max_length=75,
-        widget=forms.TextInput(attrs={'placeholder': ' first.last@helsinki.fi ', })
+        label="Institute Name",
+        widget=forms.TextInput(attrs={'placeholder':'Institute Name',})
+        #required=True
     )
-    group = forms.CharField(
-        max_length=75,
-        widget=forms.TextInput(attrs={'placeholder': ' Group Name ', })
-    )
-    institute = forms.CharField(
-        max_length=75,
-        widget=forms.TextInput(attrs={'placeholder': ' Institute Name ', })
-    )
+    
+    
+    
 
 
 class LoginForm(forms.Form):

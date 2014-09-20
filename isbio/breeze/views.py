@@ -26,7 +26,7 @@ import auxiliary as aux
 import rora as rora
 
 import forms as breezeForms
-from breeze.models import Rscripts, Jobs, DataSet, UserProfile, InputTemplate, Report, ReportType, Project, Post, Group, Statistics, Script_categories, CartInfo, User_date
+from breeze.models import Rscripts, Jobs, DataSet, UserProfile, InputTemplate, Report, ReportType, Project, Post, Group, Statistics, Script_categories, CartInfo, User_date, Institute
 
 class RequestStorage():
     form_details = OrderedDict()
@@ -86,7 +86,7 @@ def base(request):
 @login_required(login_url='/')
 def home(request, state="feed"):
     occurrences = dict()
-    print(state)
+    #print(state)
     if state == 'feed' or state == None:
         menu = 'feed_menu'
         show_menu = 'show_feed'
@@ -157,7 +157,6 @@ def home(request, state="feed"):
 
 @login_required(login_url='/')
 def jobs(request, state="scheduled"):
-    print(request)
     if state == "scheduled":
         tab = "scheduled_tab"
         show_tab = "show_sched"
@@ -182,14 +181,16 @@ def jobs(request, state="scheduled"):
     # Otherwise ruturn the first page
     if request.is_ajax() and request.method == 'GET':
         page = request.GET.get('page')
+        #print(request.GET)
         try:
             hist_jobs = paginator.page(page)
         except PageNotAnInteger:  # if page isn't an integer
+            #print("page isn't an integer")
             hist_jobs = paginator.page(1)
         except EmptyPage:  # if page out of bounds
             hist_jobs = paginator.page(paginator.num_pages)
 
-        return render_to_response('jobs-hist-paginator.html', RequestContext(request, { 'history': hist_jobs }))
+        return render_to_response('jobs-hist-paginator.html', RequestContext(request, { 'history_script': hist_jobs }))
     else:
         hist_jobs = paginator.page(1)
         return render_to_response('jobs.html', RequestContext(request, {
@@ -745,7 +746,7 @@ def store(request):
     
 @login_required(login_url='/')
 def mycart(request):
-    print("ha!")
+    #print("ha!")
     #all_items = CartInfo.objects.filter(script_buyer=request.user)
     items_free = CartInfo.objects.filter(script_buyer=request.user, type_app=True)
     items_nonfree = CartInfo.objects.filter(script_buyer=request.user, type_app=False)
@@ -1022,7 +1023,7 @@ def create_job(request, sid=None):
     script_name = str(script.name)  # tree.getroot().attrib['name']
     script_inline = script.inln
     user_info = User.objects.get(username=request.user)
-    print(request.method)
+    #print(request.method)
     if request.method == 'POST':
         # after fill the forms for creating the new job
         head_form = breezeForms.BasicJobForm(request.user, None, request.POST)
@@ -1037,7 +1038,6 @@ def create_job(request, sid=None):
             new_job.status = request.POST['job_status']
             new_job.juser = request.user
             new_job.progress = 0
-
             new_job.rexecut.save('name.r', File(open(str(settings.TEMP_FOLDER) + 'rexec.r')))
             new_job.docxml.save('name.xml', File(open(str(settings.TEMP_FOLDER) + 'job.xml')))
             new_job.rexecut.close()
@@ -1539,20 +1539,25 @@ def update_user_info_dialog(request):
     #print(request.method)
     if request.method == 'POST':
         personal_form = breezeForms.PersonalInfo(request.POST)
+        print("personal_form")
         if personal_form.is_valid():
             user_info.first_name = personal_form.cleaned_data.get('first_name', None)
             user_info.last_name = personal_form.cleaned_data.get('last_name', None)
             user_info.email = personal_form.cleaned_data.get('email', None)
-            user_details.fimm_group = personal_form.cleaned_data.get('group', None)
-            user_details.institute = personal_form.cleaned_data.get('institute', None)
-            #print(user_details.group)
+            #user_details.fimm_group = personal_form.cleaned_data.get('group', None)
+            #print(int(personal_form.cleaned_data.get('institute', None)))
+            user_details.institute_info = Institute.objects.get(id=request.POST['institute'])
+            #print(personal_form.cleaned_data.get('institute', None))
             user_info.save()
             user_details.save()
-            return HttpResponseRedirect('/home/')
+            return HttpResponseRedirect('/home')
 
     else:
-        print(user_details.institute)
-        personal_form = breezeForms.PersonalInfo(initial={'first_name': user_info.first_name, 'last_name': user_info.last_name, 'email': user_info.email, 'group': user_details.fimm_group, 'institute': user_details.institute })
+        #print(user_details.institute_info)
+        institute = tuple((user_details.institute_info.id,user_details.institute_info.institute))
+        print(institute)
+        personal_form = breezeForms.PersonalInfo(initial={'first_name': user_info.first_name, 'last_name': user_info.last_name, 'email': user_info.email,'institute': user_details.institute_info.id})
+        print(personal_form)
 
     return render_to_response('forms/basic_form_dialog.html', RequestContext(request, {
         'form': personal_form,
@@ -1561,6 +1566,41 @@ def update_user_info_dialog(request):
         'layout': 'horizontal',
         'submit': 'Save'
     }))
+
+@login_required(login_url='/')
+@csrf_exempt
+def new_institute(request):
+    user_info = User.objects.get(username=request.user)
+    print(user_info)
+    user_details = UserProfile.objects.get(user=user_info.id)
+    print(request.is_ajax())
+    if request.method == 'POST':
+        personal_form = breezeForms.NewInstitute(request.POST)
+        if personal_form.is_valid():
+            insti = Institute()
+            insti.institute = request.POST['name']
+            #print(personal_form.cleaned_data.get('institute', None))
+            insti.save()
+            #return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+            return HttpResponseRedirect('/home')
+
+    else:
+        #print(user_details.institute_info)
+        #institute = tuple((user_details.institute_info.id,user_details.institute_info.institute))
+        #print(user_details.institute_info.institute)
+        institue_form = breezeForms.NewInstitute(initial={'name': user_details.institute_info.institute})
+        print(institue_form)
+
+    return render_to_response('forms/basic_form_dialog.html', RequestContext(request, {
+        'form': institue_form,
+        'action': '/new-institute/',
+        'header': 'Create New Institute',
+        'layout': 'horizontal',
+        'submit': 'Save'
+    }))
+    
+
+
 
 @login_required(login_url='/')
 def report_search(request):

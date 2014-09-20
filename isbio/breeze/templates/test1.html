@@ -1,102 +1,5 @@
 
-    <div class="tabbable active" id="scripts">
-      <!-- Tabs' Header -->
-      <ul class="nav nav-tabs" id="jobTabs">
-        <li class="{{ history_tab }}"><a href="#history" data-toggle="tab">History</a></li>
-        <li class="{{ scheduled_tab }}" ><a href="#scheduled" data-toggle="tab">Scheduled</a></li>
-        <li class="{{ current_tab }}"><a href="#current" data-toggle="tab">In Progress</a></li>
-      </ul>
-      <!-- Tabs' Content -->
-      <div class="tab-content">
-        <!-- HISTORY -->
-        <div class="tab-pane {{ show_hist }}" id="history" style="padding-bottom: 250px">
-          <table class="table table-striped">
-            <head>
-              <tr>
-                <th>Finished</th>
-                <th>Job Name</th>
-                <th></th>
-                <th>Status</th>
-                <th>Download</th>
-                <th>Misc</th>
-                <th>Delete</th>
-              </tr>
-            </head>
-            <tbody id="history_top">
-              {% include "jobs-hist-paginator.html" %}
-            </tbody>
-          </table>
-          <p><br>&nbsp;<br></p>
-          <div id="paginator_control"></div>
-        </div>
-        <!-- SCHEDULED -->
-        <div class="tab-pane {{ show_sched }}" id="scheduled" style="padding-bottom: 250px">
-          <table class="table table-striped">
-            <head>
-              <tr>
-                <th>Scheduled</th>
-                <th>Job Name</th>
-                <th></th>
-                <th></th>
-                <th>RUN</th>
-                <th>Revise</th>
-                <th>Edit</th>
-                <th>Delete</th>
-              </tr>
-            </head>
-            <tbody>
-              {% for job in scheduled %}
-              <tr>
-                <td>{{ job.staged }}</td>
-                <td>{{ job.jname }}</td>
-                <td></td>
-                <td></td>
-                <td><a href="/jobs/run/{{ job.id }}" class="btn btn-success"> <i class="icon-play-circle"></i></a></td>
-                <td><a href="#" data-toggle="modal" class="btn btn-inverse rtext" data-target="#script"  data-param={{ job.id }}><i class="icon-white icon-info-sign"></i></a></td>
-                <td><a href="#" data-toggle="modal" class="btn btn-inverse apply" data-target="#Apply"  data-param={{ job.id }}><i class="icon-white icon-edit"></i></a></td>
-                <td><a href="#" data-toggle="modal" class="btn btn-danger" data-target="#Del" onclick="$('#del_btn').attr('href', '/jobs/delete/{{ job.id }}'); $('#del_title').text('{{ job.jname }}');" >
-                      <i class="icon-trash"></i>
-                    </a>
-                </td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
-        <!-- CURRENT -->
-        <div class="tab-pane {{ show_curr }}" id="current" style="padding-bottom: 250px">
-          <table class="table table-striped">
-            <head>
-              <tr>
-                <th>Triggered</th>
-                <th>Job Name</th>
-                <th>Progress</th>
-                <th></th>
-                <th></th>
-                <th>Actions:</th>
-                <th></th>
-                <th></th>
-                <th></th>
-              </tr>
-            </head>
-            <tbody>
-              {% for job in current %}
-              <tr id="{{ job.id }}_list_tr">
-                <td>{{ job.staged }}</td>
-                <td>{{ job.jname }}</td>
-                <td id="{{ job.id }}_list_td">{{ job.progress }} %</td>
-                <td></td>
-                <td></td>
-                <td><a href="#" class="btn btn-danger abort" data-param="/abortjobs/{{job.id}}">Abort</a></td>
-                <td></td><td></td><td></td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
-      </div>
-      <!-- END of Tabs' Content -->
-    </div>
+    
     <div class="tabbable" id="reports">
       <!-- Tabs' Header -->
       <ul class="nav nav-tabs" id="jobTabs">
@@ -195,3 +98,305 @@
       </div>
       <!-- END of Tabs' Content -->
     </div>
+    
+    
+    $.ajax({
+        type: "GET",
+        url: url,
+        success: function(data){
+            $("#mycart").load(url, function(){
+                $(".describe").click(function(ev) {
+                  ev.preventDefault(); // prevent navigation
+                  var par = $(this).data("param");
+                  //console.log("clicked");
+                  $("#Describe").load("/scripts/read-descr/"+par, function() {
+                    //console.log("ajax sent");
+                    $(this).modal('show');
+                  });
+                  return false; // prevent the click propagation
+                });
+                
+                $(".delete").click(function(ev) {
+                  ev.preventDefault(); // prevent navigation
+                  var par = $(this).data("param");
+                  var parent = $(this).parent().parent();
+                  bootbox.dialog({
+                  message: "Are you sure about removing this app from your cart? ",
+                  title: "Warning",
+                  buttons: {
+                  success: {
+                  label: "Cancel",
+                  className: "btn-success",
+                  callback: function() {
+                  //console.log("success");
+                  }
+                  },
+                  danger: {
+                  label: "Sure",
+                  className: "btn-danger",
+                  callback: function() {
+                      $.ajax({
+                        type: "GET",
+                        url: par,
+                        //data: {"hello": par},
+                        success: function(response){
+                            $.ajax({
+                                type:"GET",
+                                url:"/updatecart",
+                                success: function(data){
+                                    $('#countcart').html(data);
+                                }
+                            });
+                            if(response['count_app']==1){parent.fadeOut('slow', function(){
+                                $(this).parent().after('<tbody><tr><td></td><td><p>No resources available!</p></td> <td></td><td></td><td></td><td></td><td></td></tr></tbody>');
+                                $(this).parent().remove();
+
+                            });} else 
+                            {parent.fadeOut('slow', function(){$(this).remove();});}
+                            
+                        },
+                        error: function (request, status, error) {
+                                    //implement proper error handling
+                                    console.log("failure");
+                                    //console.log(request.responseText);
+                        }
+                      });
+                  //Example.show("uh oh, look out!");
+                  }
+                  }
+                  }
+                  });
+
+                });
+                
+                $(".deleteall").click(function(ev) {
+                  ev.preventDefault(); // prevent navigation
+                  var par = $(this).data("param");
+                  var parent = $(this).parent().parent().parent();
+                  console.log(par);
+                  bootbox.dialog({
+                  message: "Are you sure about removing all this type of apps from your cart? ",
+                  title: "Warning",
+                  buttons: {
+                  success: {
+                  label: "Cancel",
+                  className: "btn-success",
+                  callback: function() {
+                  //console.log("success");
+                  }
+                  },
+                  danger: {
+                  label: "Sure",
+                  className: "btn-danger",
+                  callback: function() {
+                      $.ajax({
+                        type: "GET",
+                        url: par,
+                        //data: {"hello": par},
+                        success: function(response){
+                          //if(response['delete']='Yes'){console.log("delete");}
+                          parent.fadeOut('slow', function(){
+                              $(this).after('<tbody><tr><td></td><td><p>No resources available!</p></td> <td></td><td></td><td></td><td></td><td></td></tr></tbody>');
+                              $(this).remove();
+                              //$(this).parent().remove();
+                              //console.log($('#testing').attr(););
+                          });
+                          $.ajax({
+                              type:"GET",
+                              url:"/updatecart",
+                              success: function(data){
+                                  $('#countcart').html(data);
+                              }
+                          });
+
+                        },
+                        error: function (request, status, error) {
+                                    //implement proper error handling
+                                    console.log("failure");
+                                    //console.log(request.responseText);
+                        }
+                      });
+                  //Example.show("uh oh, look out!");
+                  }
+                  }
+                  }
+                  });
+  
+                });
+                
+                $(".installapp").click(function(ev) {
+                  ev.preventDefault(); // prevent navigation
+                  var par = $(this).data("param");
+                  var parent = $(this).parent().parent();
+                  bootbox.dialog({
+                  message: "Install it for free ",
+                  title: "Agreement",
+                  buttons: {
+                  success: {
+                  label: "Cancel",
+                  className: "btn-danger",
+                  callback: function() {
+                  //console.log("success");
+                  }
+                  },
+                  danger: {
+                  label: "Sure",
+                  className: "btn-success",
+                  callback: function() {
+                      $.ajax({
+                        type: "GET",
+                        url: par,
+                        //data: {"hello": par},
+                        success: function(response){
+                            $.ajax({
+                                type:"GET",
+                                url:"/updatecart",
+                                success: function(data){
+                                    $('#countcart').html(data);
+                                }
+                            });
+            
+                            if(response['install_status']=='exist'){
+                                bootbox.dialog({
+                                message: "You have already installed this app! ",
+                                title: "Warning",
+                                buttons: {
+                                success: {
+                                label: "OK",
+                                className: "btn-success",
+                                callback: function() {
+                                    if(response['count_app']==1){
+                                        parent.fadeOut('slow', function(){
+                                                          $(this).parent().after('<tbody><tr><td></td><td><p>No resources available!</p></td> <td></td><td></td><td></td><td></td><td></td></tr></tbody>');
+                                                          $(this).parent().remove();
+
+                                                      });
+                                    } else {
+                                        parent.fadeOut('slow', function(){$(this).remove();});
+                                    }
+                                //console.log("success");
+                                }
+                                }
+                                }
+                                });
+                            }
+                            if(response['install_status']=='Yes'){
+
+                                        if(response['count_app']==1){
+            
+                                            parent.fadeOut('slow', function(){
+                                                              $(this).parent().after(remove_html);
+                                                              $(this).parent().remove();
+                                                          });
+                                        } else { 
+           
+                                            parent.fadeOut('slow', function(){$(this).remove();});
+                                                }
+                            } 
+                        },
+                        error: function (request, status, error) {
+                                    //implement proper error handling
+                                    console.log(status);
+                                    //console.log(request.responseText);
+                        }
+                      });
+                  //Example.show("uh oh, look out!");
+                  }
+                  }
+                  }
+                  });
+
+                });
+            });
+        },
+        error: function (request, status, error) {
+                    //implement proper error handling
+                    console.log("failure");
+        }
+    });
+    
+    
+    
+    
+    
+    $(tar).load(par, function(){
+        var addCbtn = '<a id="id_addCbtn" href="#" data-toggle="modal" class="apply btn btn-small btn-inverse" data-target="#Apply"  data-param="/new-institute/">\
+                          <i class="icon-plus icon-white"></i>\
+                        </a>'
+
+        $('#id_institute').parent().append(addCbtn);
+    });
+    
+    
+    $(tar).load(par, function(){
+        var addCbtn = '<div class="control-group required"><label class=" control-label"> New Insitute</label>'
+
+        $('#id_institute').parent().parent().parent().append(addCbtn);
+    });
+    
+    
+    
+    
+    $.get(par.toString(), function(results){
+      //$(tar).html(results); //this is only for static html
+      
+      //$('.multiselect').multiselect(multiConfigurationSet);
+
+      $(tar).modal('show');
+      $(document).ready(function(){
+        submitItemModalFormBind(url=par.toString(), modalID=tar);
+      });
+
+    }, "html");
+    
+    
+    
+    $(tar).load(url, function(){
+        $(tar).modal('show');
+        console.log("hello!")
+        $("#form_modal_apply").submit(function(){
+            console.log("nihao");
+            var url = $("#form_modal_apply").attr('action');
+        
+            $.ajax({
+                type:"GET",
+                url:url,
+                success:function(response){
+                    console.log("houhou");
+                },
+                error:function (request, status, error) {
+                  //implement proper error handling
+                  console.log(request);
+                  //console.log(request.responseText);
+                  }
+            });
+        });
+    });
+    
+    
+    
+    
+    
+    $('.updateinfo').click(function(ev){
+        ev.preventDefault();
+        var tar = $(this).data("target");
+        var par = $(this).data("param");
+        $(tar).load(par, function(){
+            $('.multiselect').multiselect(multiConfigurationSet);
+            $(tar).modal('show');
+            var addCbtn = '<a id="id_addCbtn" class="apply btn btn-small btn-inverse" data-param="/new-institute" data-target="#NewInstitute" >\
+                              <i class="icon-plus icon-white"></i>\
+                            </a>'
+        
+            $('#id_institute').parent().append(addCbtn);
+            $('#id_addCbtn').click(function(ev){
+                //console.log("click")
+                ev.preventDefault(); // prevent navigation
+                var url = $('#id_addCbtn').data('param');
+                var tar = $('#id_addCbtn').data('target');
+                $(tar).load(url, function(){
+                    $(tar).modal('show');
+                });
+            });
+        });
+    });

@@ -288,218 +288,209 @@ $(document).ready(function() {
       ev.preventDefault(); // prevent navigation
       var url = $(this).data("param");
       //console.log(url);
-      $.ajax({
-          type: "GET",
-          url: url,
-          success: function(data){
-              $("#mycart").load(url, function(){
-                  $(".describe").click(function(ev) {
-                    ev.preventDefault(); // prevent navigation
-                    var par = $(this).data("param");
-                    //console.log("clicked");
-                    $("#Describe").load("/scripts/read-descr/"+par, function() {
-                      //console.log("ajax sent");
-                      $(this).modal('show');
-                    });
-                    return false; // prevent the click propagation
-                  });
-                  
-                  $(".delete").click(function(ev) {
-                    ev.preventDefault(); // prevent navigation
-                    var par = $(this).data("param");
-                    var parent = $(this).parent().parent();
-                    bootbox.dialog({
-                    message: "Are you sure about removing this app from your cart? ",
-                    title: "Warning",
-                    buttons: {
-                    success: {
-                    label: "Cancel",
-                    className: "btn-success",
-                    callback: function() {
-                    //console.log("success");
-                    }
-                    },
-                    danger: {
-                    label: "Sure",
-                    className: "btn-danger",
-                    callback: function() {
-                        $.ajax({
-                          type: "GET",
-                          url: par,
-                          //data: {"hello": par},
-                          success: function(response){
-                              $.ajax({
-                                  type:"GET",
-                                  url:"/updatecart",
-                                  success: function(data){
-                                      $('#countcart').html(data);
-                                  }
-                              });
-                              if(response['count_app']==1){parent.fadeOut('slow', function(){
-                                  $(this).parent().after('<tbody><tr><td></td><td><p>No resources available!</p></td> <td></td><td></td><td></td><td></td><td></td></tr></tbody>');
-                                  $(this).parent().remove();
-
-                              });} else 
-                              {parent.fadeOut('slow', function(){$(this).remove();});}
-                              
-                          },
-                          error: function (request, status, error) {
-                                      //implement proper error handling
-                                      console.log("failure");
-                                      //console.log(request.responseText);
+      $("#mycart").load(url, function(){
+          $(".describe").click(function(ev) {
+            ev.preventDefault(); // prevent navigation
+            var par = $(this).data("param");
+            //console.log("clicked");
+            $("#Describe").load("/scripts/read-descr/"+par, function() {
+              //console.log("ajax sent");
+              $(this).modal('show');
+            });
+            return false; // prevent the click propagation
+          });
+          
+          $(".delete").click(function(ev) {
+            ev.preventDefault(); // prevent navigation
+            var par = $(this).data("param");
+            var parent = $(this).parent().parent();
+            bootbox.dialog({
+            message: "Are you sure about removing this app from your cart? ",
+            title: "Warning",
+            buttons: {
+            success: {
+            label: "Cancel",
+            className: "btn-success",
+            callback: function() {
+            //console.log("success");
+            }
+            },
+            danger: {
+            label: "Sure",
+            className: "btn-danger",
+            callback: function() {
+                $.ajax({
+                  type: "GET",
+                  url: par,
+                  //data: {"hello": par},
+                  success: function(response){
+                      $.ajax({
+                          type:"GET",
+                          url:"/updatecart",
+                          success: function(data){
+                              $('#countcart').html(data);
                           }
-                        });
-                    //Example.show("uh oh, look out!");
-                    }
-                    }
-                    }
+                      });
+                      if(response['count_app']==1){parent.fadeOut('slow', function(){
+                          $(this).parent().after('<tbody><tr><td></td><td><p>No resources available!</p></td> <td></td><td></td><td></td><td></td><td></td></tr></tbody>');
+                          $(this).parent().remove();
+
+                      });} else 
+                      {parent.fadeOut('slow', function(){$(this).remove();});}
+                      
+                  },
+                  error: function (request, status, error) {
+                              //implement proper error handling
+                              console.log("failure");
+                              //console.log(request.responseText);
+                  }
+                });
+            //Example.show("uh oh, look out!");
+            }
+            }
+            }
+            });
+
+          });
+          
+          $(".deleteall").click(function(ev) {
+            ev.preventDefault(); // prevent navigation
+            var par = $(this).data("param");
+            var parent = $(this).parent().parent().parent();
+            console.log(par);
+            bootbox.dialog({
+            message: "Are you sure about removing all this type of apps from your cart? ",
+            title: "Warning",
+            buttons: {
+            success: {
+            label: "Cancel",
+            className: "btn-success",
+            callback: function() {
+            //console.log("success");
+            }
+            },
+            danger: {
+            label: "Sure",
+            className: "btn-danger",
+            callback: function() {
+                $.ajax({
+                  type: "GET",
+                  url: par,
+                  //data: {"hello": par},
+                  success: function(response){
+                    //if(response['delete']='Yes'){console.log("delete");}
+                    parent.fadeOut('slow', function(){
+                        $(this).after('<tbody><tr><td></td><td><p>No resources available!</p></td> <td></td><td></td><td></td><td></td><td></td></tr></tbody>');
+                        $(this).remove();
+                        //$(this).parent().remove();
+                        //console.log($('#testing').attr(););
+                    });
+                    $.ajax({
+                        type:"GET",
+                        url:"/updatecart",
+                        success: function(data){
+                            $('#countcart').html(data);
+                        }
                     });
 
-                  });
-                  
-                  $(".deleteall").click(function(ev) {
-                    ev.preventDefault(); // prevent navigation
-                    var par = $(this).data("param");
-                    var parent = $(this).parent().parent().parent();
-                    bootbox.dialog({
-                    message: "Are you sure about removing all this type of apps from your cart? ",
-                    title: "Warning",
-                    buttons: {
-                    success: {
-                    label: "Cancel",
-                    className: "btn-success",
-                    callback: function() {
-                    //console.log("success");
-                    }
-                    },
-                    danger: {
-                    label: "Sure",
-                    className: "btn-danger",
-                    callback: function() {
-                        $.ajax({
-                          type: "GET",
-                          url: par,
-                          //data: {"hello": par},
-                          success: function(response){
-                            //if(response['delete']='Yes'){console.log("delete");}
-                            parent.fadeOut('slow', function(){
-                                $(this).after('<tbody><tr><td></td><td><p>No resources available!</p></td> <td></td><td></td><td></td><td></td><td></td></tr></tbody>');
-                                $(this).remove();
-                                //$(this).parent().remove();
-                                //console.log($('#testing').attr(););
-                            });
-                            $.ajax({
-                                type:"GET",
-                                url:"/updatecart",
-                                success: function(data){
-                                    $('#countcart').html(data);
-                                }
-                            });
+                  },
+                  error: function (request, status, error) {
+                              //implement proper error handling
+                              console.log("failure");
+                              //console.log(request.responseText);
+                  }
+                });
+            //Example.show("uh oh, look out!");
+            }
+            }
+            }
+            });
 
-                          },
-                          error: function (request, status, error) {
-                                      //implement proper error handling
-                                      console.log("failure");
-                                      //console.log(request.responseText);
+          });
+          
+          $(".installapp").click(function(ev) {
+            ev.preventDefault(); // prevent navigation
+            var par = $(this).data("param");
+            var parent = $(this).parent().parent();
+            bootbox.dialog({
+            message: "Install it for free ",
+            title: "Agreement",
+            buttons: {
+            success: {
+            label: "Cancel",
+            className: "btn-danger",
+            callback: function() {
+            //console.log("success");
+            }
+            },
+            danger: {
+            label: "Sure",
+            className: "btn-success",
+            callback: function() {
+                $.ajax({
+                  type: "GET",
+                  url: par,
+                  //data: {"hello": par},
+                  success: function(response){
+                      $.ajax({
+                          type:"GET",
+                          url:"/updatecart",
+                          success: function(data){
+                              $('#countcart').html(data);
                           }
-                        });
-                    //Example.show("uh oh, look out!");
-                    }
-                    }
-                    }
-                    });
-    
-                  });
-                  
-                  $(".installapp").click(function(ev) {
-                    ev.preventDefault(); // prevent navigation
-                    var par = $(this).data("param");
-                    var parent = $(this).parent().parent();
-                    bootbox.dialog({
-                    message: "Install it for free ",
-                    title: "Agreement",
-                    buttons: {
-                    success: {
-                    label: "Cancel",
-                    className: "btn-danger",
-                    callback: function() {
-                    //console.log("success");
-                    }
-                    },
-                    danger: {
-                    label: "Sure",
-                    className: "btn-success",
-                    callback: function() {
-                        $.ajax({
-                          type: "GET",
-                          url: par,
-                          //data: {"hello": par},
-                          success: function(response){
-                              $.ajax({
-                                  type:"GET",
-                                  url:"/updatecart",
-                                  success: function(data){
-                                      $('#countcart').html(data);
-                                  }
-                              });
-              
-                              if(response['install_status']=='exist'){
-                                  bootbox.dialog({
-                                  message: "You have already installed this app! ",
-                                  title: "Warning",
-                                  buttons: {
-                                  success: {
-                                  label: "OK",
-                                  className: "btn-success",
-                                  callback: function() {
-                                      if(response['count_app']==1){
-                                          parent.fadeOut('slow', function(){
-                                                            $(this).parent().after('<tbody><tr><td></td><td><p>No resources available!</p></td> <td></td><td></td><td></td><td></td><td></td></tr></tbody>');
-                                                            $(this).parent().remove();
+                      });
+      
+                      if(response['install_status']=='exist'){
+                          bootbox.dialog({
+                          message: "You have already installed this app! ",
+                          title: "Warning",
+                          buttons: {
+                          success: {
+                          label: "OK",
+                          className: "btn-success",
+                          callback: function() {
+                              if(response['count_app']==1){
+                                  parent.fadeOut('slow', function(){
+                                                    $(this).parent().after('<tbody><tr><td></td><td><p>No resources available!</p></td> <td></td><td></td><td></td><td></td><td></td></tr></tbody>');
+                                                    $(this).parent().remove();
 
-                                                        });
-                                      } else {
-                                          parent.fadeOut('slow', function(){$(this).remove();});
-                                      }
-                                  //console.log("success");
-                                  }
-                                  }
-                                  }
-                                  });
+                                                });
+                              } else {
+                                  parent.fadeOut('slow', function(){$(this).remove();});
                               }
-                              if(response['install_status']=='Yes'){
-  
-                                          if(response['count_app']==1){
-              
-                                              parent.fadeOut('slow', function(){
-                                                                $(this).parent().after(remove_html);
-                                                                $(this).parent().remove();
-                                                            });
-                                          } else { 
-             
-                                              parent.fadeOut('slow', function(){$(this).remove();});
-                                                  }
-                              } 
-                          },
-                          error: function (request, status, error) {
-                                      //implement proper error handling
-                                      console.log(status);
-                                      //console.log(request.responseText);
+                          //console.log("success");
                           }
-                        });
-                    //Example.show("uh oh, look out!");
-                    }
-                    }
-                    }
-                    });
+                          }
+                          }
+                          });
+                      }
+                      if(response['install_status']=='Yes'){
 
-                  });
-              });
-          },
-          error: function (request, status, error) {
-                      //implement proper error handling
-                      console.log("failure");
-          }
+                                  if(response['count_app']==1){
+      
+                                      parent.fadeOut('slow', function(){
+                                                        $(this).parent().after(remove_html);
+                                                        $(this).parent().remove();
+                                                    });
+                                  } else { 
+     
+                                      parent.fadeOut('slow', function(){$(this).remove();});
+                                          }
+                      } 
+                  },
+                  error: function (request, status, error) {
+                              //implement proper error handling
+                              console.log(status);
+                              //console.log(request.responseText);
+                  }
+                });
+            //Example.show("uh oh, look out!");
+            }
+            }
+            }
+            });
+
+          });
       });
       
           

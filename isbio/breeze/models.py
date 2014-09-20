@@ -198,6 +198,11 @@ class InputTemplate(models.Model):
     def __unicode__(self):
         return self.name
 
+class Institute(models.Model):
+    institute = models.CharField(max_length=75)
+    def __unicode__(self):
+        return self.institute
+
 class UserProfile(models.Model):
     user = models.ForeignKey(User, unique=True)
 
@@ -208,11 +213,13 @@ class UserProfile(models.Model):
 
     fimm_group = models.CharField(max_length=75)
     logo = models.FileField(upload_to=file_name, blank=True)
-    institute = models.CharField(max_length=75)
+    institute_info = models.ForeignKey(Institute)
 
     def __unicode__(self):
-        return self.user.first_name
+        return self.user.username
 
+
+    
 class Report(models.Model):
     type = models.ForeignKey(ReportType)
     name = models.CharField(max_length=55)

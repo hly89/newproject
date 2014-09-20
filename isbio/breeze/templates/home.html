@@ -53,7 +53,7 @@
         <p> <strong>Welcome:</strong> </p>
         <p>@{{ user.username|default:"USER NAME" }} </br>
         <strong> {{ user.first_name|default:"FirtstN" }} {{ user.last_name|default:"LastN" }} </strong></p> </br>
-        <a id="update_btn" href="#" data-toggle="modal" class="btn btn-mini btn-primary btn-block hcalls" data-target="#UpdateInfo"  data-param="/update-user-info/">
+        <a id="update_btn" href="#" data-toggle="modal" class="btn btn-mini btn-primary btn-block updateinfo" data-target="#UpdateInfo"  data-param="/update-user-info/">
           Update Info
         </a>
       </div>
@@ -368,6 +368,8 @@
 
 <div id="UpdateInfo" class="modal hide fade" role="dialog" aria-hidden="true" style="background: url('/static/nail.png');"></div>
 
+<div id="NewInstitute" class="modal hide fade" role="dialog" aria-hidden="true" style="background: url('/static/nail.png');"></div>
+
 <div id="DeleteItem" class="modal hide fade" role="dialog"  aria-hidden="true">
   <div class="modal-header">
     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
@@ -381,6 +383,17 @@
     <a href="#" class="btn btn-inverse" data-dismiss="modal" aria-hidden="true">Close</a>
   </div>
 </div>
+
+
+  <div class="form-content" style="display:none;">
+      {% csrf_token %}
+      <form class="form" role="form" id="myForm">
+        <div class="form-group">
+          <label for="insti">Institute Name</label>
+          <input class="form-control" id="insti" name="insti" placeholder="Institute Name"/>
+        </div>
+      </form>
+  </div>
 
 <script type="text/javascript">
   $(document).ready(function(){
@@ -548,7 +561,30 @@
 
       return false;
     }); // submitItemModalFormBind(url, modalID)
-  }
+  };
+  
+  $('.updateinfo').click(function(ev){
+      ev.preventDefault();
+      var tar = $(this).data("target");
+      var par = $(this).data("param");
+      $(tar).load(par, function(){
+          $('.multiselect').multiselect(multiConfigurationSet);
+          var addCbtn = '<a id="id_addCbtn" class="apply btn btn-small btn-inverse" data-param="/new-institute" data-target="#NewInstitute" >\
+                            <i class="icon-plus icon-white"></i>\
+                          </a>'
+        
+          $('#id_institute').parent().append(addCbtn);
+          $('#id_addCbtn').click(function(ev){
+              //console.log("click")
+              ev.preventDefault(); // prevent navigation
+              var url = $('#id_addCbtn').data('param');
+              var tar = $('#id_addCbtn').data('target');
+              $(tar).load(url, function(){
+                  $(tar).modal('show');
+              });
+          });
+      });
+  });
 
   function modalConnect(){
     // 'hcalls' Class - goes for home ajax callable elements
@@ -559,12 +595,13 @@
 
       $(element).click(function(ev){
         ev.preventDefault();
-
+        
         var par = $(this).data("param");
         var tar = $(this).data("target");
+        //console.log(tar);
         $.get(par.toString(), function(results){
-          $(tar).html(results);
-
+          $(tar).html(results); //this is only for static html
+          
           $('.multiselect').multiselect(multiConfigurationSet);
 
           $(tar).modal('show');
