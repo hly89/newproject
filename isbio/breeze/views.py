@@ -167,8 +167,13 @@ def jobs(request, state="scheduled"):
     scheduled_jobs = Jobs.objects.filter(juser__exact=request.user).filter(status__exact="scheduled").order_by("-id")
     history_jobs = Jobs.objects.filter(juser__exact=request.user).exclude(status__exact="scheduled").exclude(status__exact="active").order_by("-id")
     active_jobs = Jobs.objects.filter(juser__exact=request.user).filter(status__exact="active").order_by("-id")
-    active_reports = Report.objects.filter(status="active").filter(author__exact=request.user).order_by('-created')
+    active_reports = Report.objects.filter(status="active", author__exact=request.user).order_by('-created')
+    #print(active_reports)
     merged_active = aux.merge_job_history(active_jobs, active_reports)
+    #print(len(merged_active))
+    if(len(merged_active)>3):
+        merged_active = merged_active[0:3]
+    #print(merged_active.count())
     ready_reports = Report.objects.filter(author__exact=request.user).exclude(status__exact="scheduled").exclude(status__exact="active").order_by('-created')
     #ready_reports = Report.objects.exclude(status="active").filter(author__exact=request.user).order_by('-created')
 
@@ -176,35 +181,54 @@ def jobs(request, state="scheduled"):
 
     #paginator = Paginator(merged_history,15)  # show 15 items per page
     paginator = Paginator(history_jobs,15)
-
+    paginator_report = Paginator(ready_reports, 15)
     # If AJAX - check page from the request
     # Otherwise ruturn the first page
     if request.is_ajax() and request.method == 'GET':
         page = request.GET.get('page')
         #print(request.GET)
-        try:
-            hist_jobs = paginator.page(page)
-        except PageNotAnInteger:  # if page isn't an integer
-            #print("page isn't an integer")
-            hist_jobs = paginator.page(1)
-        except EmptyPage:  # if page out of bounds
-            hist_jobs = paginator.page(paginator.num_pages)
+        if request.GET.get('type')=='script':
+            print(request.GET.get('type'))
+            try:
+                hist_jobs = paginator.page(page)
+            except PageNotAnInteger:  # if page isn't an integer
+                #print("page isn't an integer")
+                hist_jobs = paginator.page(1)
+            except EmptyPage:  # if page out of bounds
+                hist_jobs = paginator.page(paginator.num_pages)
 
-        return render_to_response('jobs-hist-paginator.html', RequestContext(request, { 'history_script': hist_jobs }))
+            return render_to_response('jobs-hist-paginator.html', RequestContext(request, { 'history_script': hist_jobs }))
+        else:
+            try:
+                hist_jobs = paginator_report.page(page)
+            except PageNotAnInteger:  # if page isn't an integer
+                #print("page isn't an integer")
+                hist_jobs = paginator_report.page(1)
+            except EmptyPage:  # if page out of bounds
+                hist_jobs = paginator_report.page(paginator_report.num_pages)
+
+            return render_to_response('report-hist-paginator.html', RequestContext(request, { 'history_report': hist_jobs }))
+        
     else:
         hist_jobs = paginator.page(1)
+        print(active_reports)
+        if len(merged_active)<=3:
+            dash_history = hist_jobs[0:4-len(merged_active)]
+        else:
+            dash_history = hist_jobs[0]
         return render_to_response('jobs.html', RequestContext(request, {
             str(tab): 'active',
             str(show_tab): 'active',
             'jobs_status': 'active',
-            'dash_history': hist_jobs[0:3],
+            'dash_history': dash_history,
             'scheduled': scheduled_jobs,
             'history_script': history_jobs,
             'history_report': ready_reports,
-            #'current': merged_active,
+            'current': merged_active,
             'current_script': active_jobs,
             'current_report': active_reports,
-            'pagination_number': paginator.num_pages
+            'pagination_number': paginator.num_pages,
+            'pagination_report_number': paginator_report.num_pages,
         }))
 
 @login_required(login_url='/')
@@ -701,11 +725,29 @@ def dochelp(request):
 @login_required(login_url='/')
 def abortjobs(request, jid=None):
     try:
+        current_jobs = Jobs.objects.filter(status="active")
+        if current_jobs:
+            count = current_jobs.count()
         abortjob = Jobs.objects.get(id=jid)
-        abortjob.status = "abort"
+        abortjob.status = "aborted"
         abortjob.save()
-        return HttpResponse(simplejson.dumps({"abort": "Yes"}), mimetype='application/json')
-    except CartInfo.DoesNotExist:
+        return HttpResponse(simplejson.dumps({"abort": "Yes", "count_app": count}), mimetype='application/json')
+    except Jobs.DoesNotExist:
+        return HttpResponse(simplejson.dumps({"abort": "No"}), mimetype='application/json')
+        
+
+@login_required(login_url='/')
+def abortreports(request, jid=None):
+    try:
+        current_report = Report.objects.filter(status="active")
+        if current_report:
+            count = current_report.count()
+        
+        abortreport = Report.objects.get(id=jid)
+        abortreport.status = "aborted"
+        abortreport.save()
+        return HttpResponse(simplejson.dumps({"abort": "Yes", "count_app": count}), mimetype='application/json')
+    except Report.DoesNotExist:
         return HttpResponse(simplejson.dumps({"abort": "No"}), mimetype='application/json')
     
 

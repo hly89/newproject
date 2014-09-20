@@ -400,3 +400,39 @@
             });
         });
     });
+    
+    
+    
+    
+    <div class="tab-pane {{ show_curr }}" id="script_current" style="padding-bottom: 250px">
+      <table class="table table-striped">
+        <head>
+          <tr>
+            <th>Triggered</th>
+            <th>Job Name</th>
+            <th>Progress</th>
+            <th></th>
+            <th></th>
+            <th>Actions:</th>
+            <th></th>
+            <th></th>
+            <th></th>
+          </tr>
+        </head>
+        <tbody>
+          {% for job in current_script %}
+          <tr id="{{ job.id }}_list_tr">
+            <td>{{ job.staged }}</td>
+            <td>{{ job.jname }}</td>
+            <td id="{{ job.id }}_list_td">{{ job.progress }} %</td>
+            <td></td>
+            <td></td>
+            <td><a href="#" class="btn btn-danger abort" data-param="/abortjobs/{{job.id}}">Abort</a></td>
+            <td></td><td></td><td></td>
+          </tr>
+          {% empty %}
+          <tr><td></td><td><p>No scripts are running!</p></td> <td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>

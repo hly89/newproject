@@ -122,6 +122,10 @@
                           </a>
                       </td>
                     </tr>
+                    {% empty %}
+                    <tr>
+                        <td> </td> <td> No scripts in schedule! </td> <td> </td> <td> </td> <td> </td> <td> </td><td> </td><td> </td>
+                    </tr>
                     {% endfor %}
                   </tbody>
                 </table>
@@ -144,15 +148,17 @@
                   </head>
                   <tbody>
                     {% for job in current_script %}
-                    <tr id="{{ job.id }}_list_tr">
+                    <tr >
                       <td>{{ job.staged }}</td>
-                      <td>{{ job.jname }}</td>
+                      <td>{{ job.name }}</td>
                       <td id="{{ job.id }}_list_td">{{ job.progress }} %</td>
                       <td></td>
                       <td></td>
                       <td><a href="#" class="btn btn-danger abort" data-param="/abortjobs/{{job.id}}">Abort</a></td>
                       <td></td><td></td><td></td>
                     </tr>
+                    {% empty %}
+                    <tr><td></td><td><p>No scripts are running!</p></td> <td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
                     {% endfor %}
                   </tbody>
                 </table>
@@ -183,12 +189,12 @@
                       <th>Delete</th>
                     </tr>
                   </head>
-                  <tbody id="history_top">
+                  <tbody id="history_report_top">
                     {% include "report-hist-paginator.html" %}
                   </tbody>
                 </table>
                 <p><br>&nbsp;<br></p>
-                <div id="paginator_control"></div>
+                <div id="paginator_report_control"></div>
               </div>
               <!-- SCHEDULED -->
               <div class="tab-pane {{ show_sched }}" id="scheduled" style="padding-bottom: 250px">
@@ -220,6 +226,10 @@
                           </a>
                       </td>
                     </tr>
+                    {% empty %}
+                    <tr>
+                        <td> </td> <td> No reports in schedule! </td> <td> </td> <td> </td> <td> </td> <td> </td><td> </td><td> </td>
+                    </tr>
                     {% endfor %}
                   </tbody>
                 </table>
@@ -242,15 +252,17 @@
                   </head>
                   <tbody>
                     {% for job in current_report %}
-                    <tr id="{{ job.id }}_list_tr">
+                    <tr >
                       <td>{{ job.created }}</td>
                       <td>{{ job.name }}</td>
                       <td id="{{ job.id }}_list_td">{{ job.progress }} %</td>
                       <td></td>
                       <td></td>
-                      <td><a href="#" class="btn btn-danger abort" data-param="/abortjobs/{{job.id}}">Abort</a></td>
+                      <td><a href="#" class="btn btn-danger abort" data-param="/abortreports/{{job.id}}">Abort</a></td>
                       <td></td><td></td><td></td>
                     </tr>
+                    {% empty %}
+                    <tr><td></td><td><p>No reports are running!</p></td> <td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
                     {% endfor %}
                   </tbody>
                 </table>
@@ -289,14 +301,28 @@
         alignment:'center',
         onPageChanged: function(e,oldPage,newPage){
           //console.log( $('#pagination-test').load('/reports/ #pagination_context', "Page:" + newPage ) );
-          $.get("/jobs/", { page: newPage }, function(data){
+          $.get("/jobs/", { page: newPage, type:'script' }, function(data){
             $('#history_top').html(data);
           });
         }
       }
 
     $('#paginator_control').bootstrapPaginator(pagOptions);
-
+    
+    var pageOptsReport = {
+        currentPage:1,
+        numberOfPages:5,
+        totalPages: "{{ pagination_report_number }}",
+        alignment:'center',
+        onPageChanged: function(e,oldPage,newPage){
+          //console.log( $('#pagination-test').load('/reports/ #pagination_context', "Page:" + newPage ) );
+          $.get("/jobs/", { page: newPage, type:'report' }, function(data){
+            $('#history_report_top').html(data);
+          });
+        }
+    }
+    $('#paginator_report_control').bootstrapPaginator(pageOptsReport);
+    
     modalConnect();
 
     $(".jbar").each(function(){
@@ -310,7 +336,6 @@
         ev.preventDefault(); // prevent navigation
         var par = $(this).data("param");
         var parent = $(this).parent().parent();
-        console.log(par)
         bootbox.dialog({
         message: "Are you sure about aborting this job? ",
         title: "Warning",
@@ -331,11 +356,19 @@
               url: par,
               //data: {"hello": par},
               success: function(response){
-                  //if(response['count_app']==1){parent.fadeOut('slow', function(){
-                    //  $(this).parent().after('<tbody><tr><td></td><td><p>No resources available!</p></td> <td></td><td></td><td></td><td></td><td></td></tr></tbody>');
-                    //  $(this).parent().remove();
-
-                  //});} else 
+                  if(response['abort']=='Yes'){
+                      
+                      if(response['count_app']==1){
+                          parent.fadeOut('slow', function(){
+                          $(this).parent().after('<tbody><tr><td></td><td><p>No jobs are running!</p></td> <td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr></tbody>');
+                          $(this).parent().remove();
+                      });
+                      } else{
+                          parent.fadeOut('slow', function(){$(this).remove();});
+                      }
+                      
+                  }
+                   //else 
                   //{parent.fadeOut('slow', function(){$(this).remove();});}
                   //parent.fadeOut('slow', function(){$(this).remove();});
               },
