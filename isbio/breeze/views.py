@@ -248,8 +248,10 @@ def scripts(request, layout="list"):
             cat_list[str(each_cate.category).capitalize()] = all_scripts.filter(category=each_cate, istag="0", draft="0")
             cate.append(str(each_cate.category).capitalize())
     
-    cat_list['reports'] = all_scripts.filter(istag="1")
-    #report_types = ReportType.objects.filter(access=request.user)
+    #cat_list['reports'] = all_scripts.filter(istag="1")
+    #reports = all_scripts.filter(istag="1")
+    print(cate)
+    report_types = ReportType.objects.filter(access=request.user)
     ''''
     cat_list = dict()
     categories = list()
@@ -267,7 +269,7 @@ def scripts(request, layout="list"):
         'scripts_status': 'active',
         'cate': cate,
         'cat_list': sorted(cat_list.iteritems()),
-        #'reports': report_types,
+        'reports': report_types,
         'thumbnails': nails
     }))
 
@@ -1445,7 +1447,7 @@ def new_rtype_dialog(request):
     form = breezeForms.NewRepTypeDialog(request.POST or None)
 
     if form.is_valid():
-        rshell.init_pipeline(form)
+        rshell.init_pipeline(form, request.user)
         return HttpResponse(True)
 
     return render_to_response('forms/basic_form_dialog.html', RequestContext(request, {

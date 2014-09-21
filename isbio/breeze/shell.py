@@ -5,6 +5,7 @@ import xml.etree.ElementTree as xml
 from Bio import Entrez
 from django.template.defaultfilters import slugify
 from django.conf import settings
+from django.contrib.auth.models import User, Group
 from django.core.files import File, base
 import breeze.models
 import auxiliary as aux
@@ -49,17 +50,30 @@ def init_script(name, inline, person):
 
     return False
 
-def init_pipeline(form):
+def init_pipeline(form, user):
     """
         Initiates a new RetortType item in the DB.
         Creates a folder for initial pipeline data.
     """
     # First Save the data that comes with a form:
     # 'type', 'description', 'search', 'access'
-    new_pipeline = form.save()
-
+    print(user)
+    new_pipeline = breeze.models.ReportType()
+    author = User.objects.get(username=user)
+    new_pipeline.author = author
+    new_pipeline.type = form.cleaned_data['type']
+    new_pipeline.description = form.cleaned_data['description']
+    new_pipeline.search = form.cleaned_data['search']
+    new_pipeline.save()
+    new_pipeline.access.add(author)
+    for each in form.cleaned_data['access']:
+        new_pipeline.access.add(each)
+    #new_pipeline.access.add(form.cleaned_data['access'])
+    #new_pipeline = form.save()
+    #print(form.cleaned_data['access'])
     # Add configuration file
     new_pipeline.config.save('config.txt', base.ContentFile('#          Configuration Module  \n'))
+    
     new_pipeline.save()
 
     return True

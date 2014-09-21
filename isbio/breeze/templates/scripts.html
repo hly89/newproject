@@ -73,6 +73,7 @@
               <div>
                 <ul class="thumbnails">
                 {% for scr in script_list %}
+                  {% if scr.istag != 1 %}
                   <li class="span4">
                     <div class="thumbnail">
                       <img {% if scr.logo %} src="/media/{{ scr.logo }}" {% else %} src="/static/logos/rlogo.jpg" {% endif %} width="95" height="95" class="img-rounded">
@@ -86,6 +87,7 @@
                       </div>
                     </div>
                   </li>
+                  {% endif %}
                 {% empty %}
                   <p>No resources available!</p>
                 {% endfor %}
@@ -102,6 +104,7 @@
                 
                 <tbody>
                   {% for scr in script_list %}
+                  {% if scr.istag != 1 %}
                   <tr>
                     <td style="vertical-align: middle"><img {% if scr.logo %} src="/media/{{ scr.logo }}" {% else %} src="/static/logos/rlogo.jpg" {% endif %} width="55" height="55" class="img-rounded"></td>
                     <td style="vertical-align: middle"><strong>{{ scr.name }} <br /> <span class="subscript"> (author: {{ scr.author }}) </span> </strong></td>
@@ -128,6 +131,9 @@
                           <i class="icon-trash"></i>
                     </td>
                   </tr>
+                  {% endif %}
+                  {% empty %}
+                    <p>No resources available!</p>
                   {% endfor %}
                 </tbody>
               </table>
