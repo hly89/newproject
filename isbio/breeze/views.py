@@ -275,13 +275,15 @@ def scripts(request, layout="list"):
 
 @login_required(login_url='/')
 def reports(request):
-    print("i am here")
-    all_reports = Report.objects.filter(status="succeed").order_by('-created')
+    #print("i am here")
+    # get the user's institute
+    insti = UserProfile.objects.get(user=request.user).institute_info
+    all_reports = Report.objects.filter(status="succeed", institute=insti).order_by('-created')
     report_type_lst = ReportType.objects.filter(access=request.user)
     # later all_users will be changed to all users from the same insitute
     all_users = User.objects.all()
     all_projects = Project.objects.all()
-    paginator = Paginator(all_reports,30)  # show 3 items per page
+    paginator = Paginator(all_reports,30)  # show 30 items per page
 
     # If AJAX - check page from the request
     # Otherwise ruturn the first page
@@ -293,7 +295,7 @@ def reports(request):
             reports = paginator.page(1)
         except EmptyPage:  # if page out of bounds
             reports = paginator.page(paginator.num_pages)
-            print("i love u!")
+            #print("i love u!")
         return render_to_response('reports-paginator.html', RequestContext(request, { 'reports': reports }))
     else:
         reports = paginator.page(1)
@@ -380,10 +382,9 @@ def addtocart(request, sid=None):
         
         scr = Rscripts.objects.get(id = sid)
         #print(scr.author)
-        if(scr.author == request.user): return HttpResponse(simplejson.dumps({"author": "Yes"}), mimetype='application/json')
-        else:
-            items = CartInfo.objects.get(product = sid)
-            return HttpResponse(simplejson.dumps({"exist": "Yes"}), mimetype='application/json')
+        
+        items = CartInfo.objects.get(product = sid)
+        return HttpResponse(simplejson.dumps({"exist": "Yes"}), mimetype='application/json')
     except CartInfo.DoesNotExist:
         #print("shit")
         scripts = Rscripts.objects.get(id = sid)
@@ -441,19 +442,47 @@ def install(request, sid=None):
             return HttpResponse(simplejson.dumps({"install_status": "Yes", 'count_app': count_app}), mimetype='application/json')
     except CartInfo.DoesNotExist:
         return HttpResponse(simplejson.dumps({"install_status": "No"}), mimetype='application/json')
+        
+
+@login_required(login_url='/')
+def installreport(request, sid=None):
+    try:
+        #get the report type by id
+        report_type = ReportType.objects.get(id=sid)
+        report_type.access.add(request.user)
+        return HttpResponse(simplejson.dumps({"install_status": "Yes"}), mimetype='application/json')
+    except ReportType.DoesNotExist:
+        return HttpResponse(simplejson.dumps({"install_status": "No"}), mimetype='application/json')
     
 @login_required(login_url='/')
 def deletefree(request):
-    print("hello!")
+    #print("hello!")
     #print(sid)
     try:
         items = CartInfo.objects.filter(type_app = True)
         #products = CartInfo.objects.filter(type_app = True).values()
-        print(items)
+        #print(items)
         items.delete()
         #print("he")
         return HttpResponse(simplejson.dumps({"delete": "Yes"}), mimetype='application/json')
     except CartInfo.DoesNotExist:
+        return HttpResponse(simplejson.dumps({"delete": "No"}), mimetype='application/json')
+
+
+@login_required(login_url='/')
+def deletepipeline(request, rid=None):
+    try:
+        report_type = ReportType.objects.get(id=rid)
+        # get the tags connect to this report type
+        tags = report_type.rscripts_set.all()
+        print(tags)
+        for each in tags:
+            if request.user in each.access.all():
+                each.access.remove(request.user)
+        count = request.user.pipeline_access.all().count()
+        report_type.access.remove(request.user)
+        return HttpResponse(simplejson.dumps({"delete": "Yes", "count": count}), mimetype='application/json')
+    except ReportType.DoesNotExist:
         return HttpResponse(simplejson.dumps({"delete": "No"}), mimetype='application/json')
         
 #@login_required(login_url='/')
@@ -605,15 +634,31 @@ def report_overview(request, rtype, iname, iid=None, mod=None):
         # Renders report overview and available tags
         property_form = breezeForms.ReportPropsForm(request=request)
         tags_data_list = breezeForms.create_report_sections(tags, request)
+        access_script = list(request.user.users.all().values('name'))
+        script = list()
+        for each in access_script:
+            script.append(each['name'])
 
     return render_to_response('search.html', RequestContext(request, {
         'overview': True,
         'reports_status': 'active',
         'overview_info': overview,
         'props_form': property_form,
-        'tags_available': tags_data_list
+        'tags_available': tags_data_list,
+        'access_script': script
     }))
 
+@login_required(login_url='/')
+def showdetails(request, sid=None):
+    tags = ReportType.objects.get(id=sid).rscripts_set.all()
+    print(request.user)
+    app_installed = request.user.users.all()
+    
+    return render_to_response('store-tags.html', RequestContext(request, {
+      'tags': tags,
+      'app_installed': app_installed  
+    })
+    )
 
 @login_required(login_url='/')
 def search(request, what=None):
@@ -759,20 +804,18 @@ def store(request):
     cate = list()
     scripts = Rscripts.objects.filter(draft="0", istag="0")
     count_app = CartInfo.objects.all().count()
-    if count_app == 1:
-        apps = 'app'
-    elif count_app > 1:
-        apps = 'apps'
-    else:
-        apps = ''
     cat_list = dict()
     #categories = list()
     for each_cate in categories:
         if Rscripts.objects.filter(category=each_cate, istag="0", draft="0").count() > 0:
             cat_list[str(each_cate.category).capitalize()] = Rscripts.objects.filter(category=each_cate, istag="0", draft="0")
             cate.append(str(each_cate.category).capitalize())
+    # get the tags
+    tags = Rscripts.objects.filter(istag="1")
+    reports = ReportType.objects.all()
     
-    cat_list['reports'] = Rscripts.objects.filter(istag="1")
+    # get all the scripts that users have installed
+    app_installed = request.user.users.all()
     '''
     for script in all_scripts:
         if str(script.category).capitalize() not in categories:
@@ -785,7 +828,9 @@ def store(request):
         'script_list': scripts,
         'cat_list': sorted(cat_list.iteritems()),
         'count_mycart': count_app,
-        'apps':apps
+        'reports': reports,
+        'app_installed':app_installed
+        #'tags': tags
     }))
     
 @login_required(login_url='/')
@@ -1380,8 +1425,8 @@ def update_jobs(request, jid, item):
         sge_status = rshell.track_sge_job(Report.objects.get(id=jid))
         # request job instance again to be sure that the data is updated
         report = Report.objects.get(id=jid)
-        #report = rshell.run_report(report)
-        report.status = "succeed"
+        report = rshell.run_report(report)
+        #report.status = "succeed"
         response = dict(id=report.id, name=str(report.name), staged=str(report.created), status=str(report.status), progress=report.progress, sge=sge_status)
 
 
@@ -1398,6 +1443,10 @@ def send_dbcontent(request, content, iid=None):
     elif content == "description":
         script = Rscripts.objects.get(id=int(iid[1:]))
         response["description"] = script.details
+        return HttpResponse(simplejson.dumps(response), mimetype='application/json')
+    elif content == "agreement":
+        script = Rscripts.objects.get(id=int(iid[1:]))
+        response["agreement"] = script.details
         return HttpResponse(simplejson.dumps(response), mimetype='application/json')
     else:
         # return empty dictionary if content was smth creepy

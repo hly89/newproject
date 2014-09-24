@@ -90,6 +90,7 @@ class Rscripts(models.Model):
     name = models.CharField(max_length=35, unique=True)
     inln = models.CharField(max_length=150, blank=True)
     details = models.CharField(max_length=5500, blank=True)
+    agreement = models.CharField(max_length=9000, blank=True)
     #category = models.CharField(max_length=25, choices=CATEGORY_OPT, default=u'general')
     category = ForeignKey(Script_categories, to_field="category")
     author = ForeignKey(User)
@@ -156,6 +157,7 @@ class Jobs(models.Model):
     # status may be changed to NUMVER later
     status = models.CharField(max_length=15)
     staged = models.DateTimeField(auto_now_add=True)
+    created = models.DateTimeField(auto_now_add=True)
     progress = models.IntegerField()
     sgeid = models.CharField(max_length=15, blank=True)
 
@@ -232,7 +234,8 @@ class Report(models.Model):
     status = models.CharField(max_length=15, blank=True)
     progress = models.IntegerField()
     sgeid = models.CharField(max_length=15)
-
+    # store the institute info of the user who creates this report
+    institute = ForeignKey(Institute)
     project = models.ForeignKey(Project, null=True, blank=True, default=None)
     shared = models.ManyToManyField(User, null=True, blank=True, default=None, related_name='report_shares')  # share list
 

@@ -182,7 +182,13 @@
 
             <tr class="info">
               <!-- tag title -->
-              <td> <strong>&nbsp;{{ item.name }}</strong> </td>
+              <td> <strong>&nbsp;{{ item.name }}
+                  {% if item.name in access_script %}
+                   <span class='label label-success'><i class='icon-ok icon-green'> </i></span>
+                   {% else %}
+                   <span class='label label-important'><i class='icon-remove icon-red'> </i> Get it from market first!</span>
+                   {% endif %}
+               </strong> </td>
               <!-- tag options button -->
               <td>
                 <button id="{{ item.id }}_optbtn" disabled="disabled" type="button" class="btn btn btn-info pull-right" data-toggle="collapse" data-target="#{{ item.id }}_options">
@@ -191,8 +197,13 @@
               </td>
               <!-- tag trigger -->
               <td>
+                  
                 <div id="{{ item.id }}_switcher" class="switch switch-small pull-right trigger" data-which="{{ item.id }}" data-on="primary" data-off="info" data-on-label="<i class='icon-ok icon-white'></i>" data-off-label="<i class='icon-remove icon-white'></i>">
+                    {% if item.name in access_script %}
                   <input type="checkbox">
+                  {% else %}
+                  <input type="checkbox" disabled/>
+                  {% endif %}
                 </div>
               </td>
             </tr>

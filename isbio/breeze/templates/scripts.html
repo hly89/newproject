@@ -209,6 +209,11 @@
             <!-- Reports -->
             <div class="tab-pane" id="reports">
               <table class="table table-striped">
+                  <head>
+                    <tr>
+                      <th>ReprotType</th> <th>ReportName</th> <th>Details</th><th>Action</th> <th>Delete</th>
+                    </tr>
+                  </head>
                 <tbody>
                   {% for report in reports %}
                   <tr>
@@ -229,7 +234,15 @@
                           <strong>Create&nbsp;Report&nbsp;&nbsp;<i class="icon-th"></i></i></strong>
                         </button>
                       </td>
+                      <td style="vertical-align: middle">
+                          <a  class="btn btn-danger deletepipeline"  data-param="/deletepipeline/{{ report.id }}" data-cate="pipeline">
+                            <i class="icon-trash"></i>
+                      </td>
                     </form>
+                  </tr>
+                  {% empty %}
+                  <tr>
+                      <td></td><td> No pipelines available!</td><td></td><td></td><td></td>
                   </tr>
                   {% endfor %}
                 </tbody>
@@ -273,7 +286,7 @@ $(document).ready(function() {
     maxHeight: 450
   };
   $('.dotmatix_samples').multiselect(multiConfigurationSet);
-  var remove_html = '<tbody><tr><td></td><td><p>No resources available!</p></td> <td></td><td></td><td></td><td></td><td></td></tr></tbody>';
+  var remove_html = '<tbody><tr><td></td><td><p>No resources available!</p></td> <td></td><td></td><td></td></tr></tbody>';
   
   
   $(".deletescript").click(function(ev) {
@@ -331,6 +344,34 @@ $(document).ready(function() {
     
   });
 
+
+  $(".deletepipeline").click(function(ev){
+      ev.preventDefault();
+      var par = $(this).data("param");
+      var parent = $(this).parent().parent();
+      $.ajax({
+          type:"GET",
+          url: par,
+          success: function(response){
+              if(response['delete']=='Yes'){
+                  if(response['count']==1){
+                      parent.fadeOut('slow', function(){
+                                        $(this).parent().after('<tbody><tr><td></td><td><p>No pipelines available!</p></td> <td></td><td></td><td></td></tr></tbody>');
+                                        $(this).parent().remove();
+
+                                    });
+                  } else{
+                      parent.fadeOut('slow', function(){$(this).remove();});
+                  }
+                  
+              }
+          },
+          error:function (request, status, error) {
+                      //implement proper error handling
+                      console.log("failure");
+          }
+      });
+  });
 
   $(".describe").click(function(ev) {
     ev.preventDefault(); // prevent navigation

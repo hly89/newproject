@@ -9,6 +9,9 @@
   <script type="text/javascript" src="/static/js/bootstrap-multiselect.js"></script>
   <link rel="stylesheet" href="/static/css/bootstrap-multiselect.css" type="text/css"/>
   <script type="text/javascript" src="/static/js/jqdrawbsgrid.js"></script>
+  
+  <link href="/static/css/bootstrapSwitch.css" rel="stylesheet">
+  <script src="/static/js/bootstrapSwitch.js"></script>
 
 <style>
   .thumbnails .span4:nth-child(3n+1) {
@@ -90,10 +93,15 @@
                                </strong>
                           </td>
                           <td style="vertical-align: middle">
-                              
+                              {% if scr in app_installed %}
+                              <a  class="btn btn-inverse" disabled='disabled'>
+                                <strong>Installed&nbsp;<i class="icon-ok icon-white"></i></strong>
+                              </a>
+                              {% else %}
                             <a href="/addtocart/{{ scr.id }}" class="btn btn-inverse apply"   data-param="/addtocart/{{ scr.id }}">
                               <strong>Add&nbsp;to&nbsp; Cart&nbsp;<i class="icon-shopping-cart icon-white"></i></strong>
                             </a>
+                            {% endif %}
                           </td>
 
                         </tr>
@@ -139,10 +147,15 @@
                              </strong>
                         </td>
                         <td style="vertical-align: middle">
-                            
+                          {% if scr in app_installed %}
+                          <a href="/addtocart/{{ scr.id }}" class="btn btn-inverse apply"   data-param="/addtocart/{{ scr.id }}" disabled='disabled'>
+                            <strong>Installed&nbsp;<i class="icon-ok icon-white"></i></strong>
+                          </a>
+                          {% else %}
                           <a href="/addtocart/{{ scr.id }}" class="btn btn-inverse apply"   data-param="/addtocart/{{ scr.id }}">
                             <strong>Add&nbsp;to&nbsp; Cart&nbsp;<i class="icon-shopping-cart icon-white"></i></strong>
                           </a>
+                          {% endif %}
                         </td>
 
                       </tr>
@@ -158,10 +171,63 @@
                   </table>
                 </div>
                 {% endfor %}
+                <!--show reports/pipelines-->
+                <div class="tab-pane" id="reports">
+                    <table class="table table-striped">
+                      <head>
+                        <tr>
+                           <th>Name</th> <th>Author</th> <th>Data</th> <th> Description</th>
+                          <th>Module</th><th>Action</th>
+                        </tr>
+                      </head>
+                      <tbody>
+                        {% for scr in reports %}
+                         {% if scr.rscripts_set.all%}
+                        <tr>
+                          <td style="vertical-align: middle"><strong>{{ scr.type }} <br /> 
+                          </strong></td>
+                          <td style="vertical-align: middle">{{ scr.author.username }}</td>
+                          <td style="vertical-align: middle"><i>{{ scr.created}}</i></td>
+                          <td style="vertical-align: middle">
+                            <a href="#" data-toggle="modal" class="btn btn-primary" data-target="#RepTypeInfo" onclick="$('#type_title').text('{{ scr.type }}'); $('#info_body').text('{{ scr.description|default:"None" }}');">
+                              <i class="icon-info-sign icon-white"></i>
+                            </a>
+                          </td>
+                          <td style="vertical-align: middle">
+                              <div class="switch switch-small" data-on="primary" data-off="info" data-which="#{{scr.id}}_Details" data-param="/showdetails/{{ scr.id }}">
+                                  <input type="checkbox"/>
+                              </div>                           
+                          </td>
+                          <td style="vertical-align: middle">
+                            
+                            <a href="/installreport/{{ scr.id }}" class="btn btn-inverse installreport"   data-param="/installreport/{{ scr.id }}">
+                              <strong>Install&nbsp;<i class="icon-white icon-download-alt"></i></strong>
+                            </a>
+                          </td>
+
+                        </tr>
+                        <tr>
+                            <td colspan="6">
+                            <div id="{{scr.id}}_Details" class="collapse">
+                                {% include 'store-tags.html' %}
+                            </div>
+                            </td>
+                        </tr>
+                        {% endif %}
+                        {% empty %}
+                        <tr>
+                            <td></td> <td><p>No reports available!</p></td> <td></td>
+                            <td></td>
+                            <td></td><td></td>
+                        </tr>
+                        
+                        {% endfor %}
+                      </tbody>
+                    </table>
+                </div>
                 <!-- show my cart -->
                 <div class="tab-pane" id="mycart">
-                                <% include "cartinfo.html" %>
-                    
+                                {% include "cartinfo.html" %}                    
                 </div>
             </div>
         </div>
@@ -186,6 +252,19 @@
   </div>
 </div>
 
+<div id="RepTypeInfo" class="modal hide fade" role="dialog"  aria-hidden="true">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+    <h3 id="type_title"> </h3>
+  </div>
+  <div class="modal-body">
+    <p id="info_body"></p>
+  </div>
+  <div class="modal-footer">
+    <a href="#" class="btn btn-inverse" data-dismiss="modal" aria-hidden="true">Close</a>
+  </div>
+</div>
+
 <script type="text/javascript">
 $(document).ready(function() {
 
@@ -196,11 +275,88 @@ $(document).ready(function() {
     maxHeight: 450
   };
   $('.dotmatix_samples').multiselect(multiConfigurationSet);
-
+    
+    
+  
+  $('.switch').on('switch-change', function (event, state) {
+      var value = state.value;
+      var tar = $(this).data("which");
+      //console.log(tar);
+      var par = $(this).data("param");
+      if(value){
+          console.log("on");
+          $(tar).load(par, function(){
+              $(tar).collapse('show');
+              $(".describe").click(function(ev) {
+                ev.preventDefault(); // prevent navigation
+                var par = $(this).data("param");
+    
+                //console.log("clicked");
+                $("#Describe").load("/scripts/read-descr/"+par, function() {
+                  //console.log("ajax sent");
+                  $(this).modal('show');
+                });
+                return false; // prevent the click propagation
+              });
+              $(".apply").click(function(ev) {
+                ev.preventDefault(); // prevent navigation
+                var par = $(this).data("param");
+                //console.log(par);
+                $.ajax({
+                  type: "GET",
+                  url: par,
+                  //data: {"hello": par},
+                  success: function(data){
+                      //console.log(data);
+                      if(data['exist']=="Yes"){
+                          $.ajax({
+                              type:"GET",
+                              url:"/updatecart",
+                              success: function(data){
+                                  $('#countcart').html(data);
+                              }
+                          });
+                          bootbox.dialog({
+                              message: "This app has already in your cart!",
+                              title: "Warning",
+                              buttons: {
+                              success: {
+                              label: "Ok",
+                              className: "btn-success",
+                              callback: function() {
+                              //console.log("success");
+                              }
+                              }
+                              }
+                              });
+                      } 
+                      if(data['exist']=="No"){
+                          $.ajax({
+                              type:"GET",
+                              url:"/updatecart",
+                              success: function(data){
+                                  $('#countcart').html(data);
+                              }
+                          });
+                      }
+                  },
+                  error: function (request, status, error) {
+                              //implement proper error handling
+                              console.log("failure");
+                  }
+                });
+              });
+          });
+      }else{
+          $(tar).collapse('hide');
+      }
+      //console.log(value);
+  }); 
 
   $(".describe").click(function(ev) {
     ev.preventDefault(); // prevent navigation
     var par = $(this).data("param");
+    
     //console.log("clicked");
     $("#Describe").load("/scripts/read-descr/"+par, function() {
       //console.log("ajax sent");
@@ -209,10 +365,53 @@ $(document).ready(function() {
     return false; // prevent the click propagation
   });
   
+
+  
   var remove_html = '<tbody><tr><td></td><td><p>No resources available!</p></td> <td></td><td></td><td></td><td></td><td></td></tr></tbody>';
 
   
- 
+  $(".installreport").click(function(ev){
+      ev.preventDefault();
+      var par = $(this).data("param");
+      $.ajax({
+          type:"GET",
+          url: par,
+          success: function(reponse){
+              if(reponse['install_status']=='Yes'){
+                  bootbox.dialog({
+                  message: "Installization is done!",
+                  title: "Information",
+                  buttons: {
+                  success: {
+                  label: "Ok!",
+                  className: "btn-success",
+                  callback: function() {
+                  }
+                  }
+                  }
+                  });
+              } else{
+                  bootbox.dialog({
+                  message: "installization fails!",
+                  title: "Warning",
+                  buttons: {
+                  success: {
+                  label: "Ok!",
+                  className: "btn-success",
+                  callback: function() {
+                  }
+                  }
+                  }
+                  });
+              }
+          },
+          error: function (request, status, error) {
+                      //implement proper error handling
+                      console.log("failure");
+          }
+      });
+  });
+  
   $(".apply").click(function(ev) {
     ev.preventDefault(); // prevent navigation
     var par = $(this).data("param");
@@ -245,28 +444,6 @@ $(document).ready(function() {
                   }
                   });
           } 
-          if(data['author']=="Yes"){
-              $.ajax({
-                  type:"GET",
-                  url:"/updatecart",
-                  success: function(data){
-                      $('#countcart').html(data);
-                  }
-              });
-              bootbox.dialog({
-                  message: "This app has been developed by you!",
-                  title: "Warning",
-                  buttons: {
-                  success: {
-                  label: "Ok",
-                  className: "btn-success",
-                  callback: function() {
-                  //console.log("success");
-                  }
-                  }
-                  }
-                  });
-          }
           if(data['exist']=="No"){
               $.ajax({
                   type:"GET",
@@ -424,7 +601,7 @@ $(document).ready(function() {
             }
             },
             danger: {
-            label: "Sure",
+            label: "Agree",
             className: "btn-success",
             callback: function() {
                 $.ajax({

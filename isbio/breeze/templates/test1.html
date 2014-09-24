@@ -436,3 +436,19 @@
         </tbody>
       </table>
     </div>
+    
+    
+    
+    
+    $.ajax({
+        type:"GET",
+        url:par,
+        success:function(data){
+            $(tar).html(data);
+            $(tar).collapse();
+        },
+        error:function (request, status, error) {
+                    //implement proper error handling
+                    console.log("failure");
+        }
+    });

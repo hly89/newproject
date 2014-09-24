@@ -84,6 +84,7 @@
         <ul class="nav nav-tabs">
           <li class="{{ general_tab }}"><a href="#general" data-toggle="tab"><strong> General </strong></a></li>
           <li class="{{ descript_tab }}"><a href="#description" data-toggle="tab"><strong> Description </strong></a></li>
+          <li class="{{ agreement_tab }}"><a href="#agreement" data-toggle="tab"><strong> Agreement </strong></a></li>
           <li class="{{ attribut_tab }}"><a href="#attributes" data-toggle="tab"><strong> Attributes </strong></a></li>
           <li class="{{ fbuilder_tab }}"><a href="#builder" data-toggle="tab"><strong> Form Builder </strong></a></li>
           <li class="{{ sources_tab }}"><a href="#sources" data-toggle="tab"><strong> Sources </strong></a></li>
@@ -119,6 +120,18 @@
               </div>
               <button id="update_descr_button" class="btn btn-primary pull-right" type="submit"><strong>Update</strong></button>
             </form>
+          </div>
+          <!-- Agreement =====================-->
+          <div class="tab-pane" id="agreement">
+              <form id="description_form" class="form-horizontal" action="/resources/scripts/script-editor/update/{{ script.id }}" method="post">
+                  {% csrf_token %}
+              <div class="control-group">
+                  <div class="controls">
+                      <textarea id="agreement_content" class="input-xxlarge" rows="11" name="agreement_content" > </textarea>
+                  </div>
+                  <button id="update_agreement_button" class="btn btn-primary pull-right" type="submit"><strong>Update</strong></button>
+              </div>
+          </form>
           </div>
           <!-- Attributes =================== -->
           <div class="tab-pane {{ attribut_tab }}" id="attributes">
@@ -267,8 +280,18 @@ $(document).ready(function() {
       "html": true,
       "image": true
     });
+    
+  var agreement = $('#agreement_content').wysihtml5({
+      "color": true,
+      "html": true,
+      "image": true
+    });
   $.getJSON('/resources/scripts/script-editor/get-content/description-{{ script.id }}', function(data) {
     myhtmlEditor.data("wysihtml5").editor.setValue(data.description);
+  });
+  
+  $.getJSON('/resources/scripts/script-editor/get-content/agreement-{{ script.id }}', function(data) {
+    agreement.data("wysihtml5").editor.setValue(data.agreement);
   });
 
   // Update Description
