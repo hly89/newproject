@@ -279,9 +279,15 @@ def reports(request):
     # get the user's institute
     insti = UserProfile.objects.get(user=request.user).institute_info
     all_reports = Report.objects.filter(status="succeed", institute=insti).order_by('-created')
-    report_type_lst = ReportType.objects.filter(access=request.user)
+    report_type_lst = ReportType.objects.filter(institute=insti)
+    reptypelst = list()
+    for each in report_type_lst:
+        if each.rscripts_set.all():
+            reptypelst.append(each)
+    #print(reptypelst)
     # later all_users will be changed to all users from the same insitute
-    all_users = User.objects.all()
+    all_users = UserProfile.objects.filter(institute_info=insti)
+    #print(all_users)
     all_projects = Project.objects.all()
     paginator = Paginator(all_reports,30)  # show 30 items per page
 
@@ -302,7 +308,7 @@ def reports(request):
         return render_to_response('reports.html', RequestContext(request, {
             'reports_status': 'active',
             'reports': reports,
-            'rtypes': report_type_lst,
+            'rtypes': reptypelst,
             'users': all_users,
             'projects': all_projects,
             'pagination_number': paginator.num_pages
@@ -718,7 +724,9 @@ def resources(request):
 
 @login_required(login_url='/')
 def manage_scripts(request):
-    all_scripts = Rscripts.objects.all()
+    #all_scripts = Rscripts.objects.all()
+    # find the script user can edit
+    all_scripts = request.user.edit_scripts.all()
     paginator = Paginator(all_scripts, 25)
     # If AJAX - check page from the request
     # Otherwise ruturn the first page
@@ -903,7 +911,12 @@ def script_editor_update(request, sid=None):
             return HttpResponse(rshell.update_script_description(script, request.POST))
         else:
             pass
-
+        
+        # Agreement Tab
+        if request.POST['form_name'] == 'agreement' and request.is_ajax():
+            script.agreement = str(request.POST['agreement_content'])
+            script.save()
+            return HttpResponse(True)
         # Attributes Tab
         if request.POST['form_name'] == 'attributes':
             f_attrs = breezeForms.ScriptAttributes(request.POST, instance=script)
@@ -1446,7 +1459,7 @@ def send_dbcontent(request, content, iid=None):
         return HttpResponse(simplejson.dumps(response), mimetype='application/json')
     elif content == "agreement":
         script = Rscripts.objects.get(id=int(iid[1:]))
-        response["agreement"] = script.details
+        response["agreement"] = script.agreement
         return HttpResponse(simplejson.dumps(response), mimetype='application/json')
     else:
         # return empty dictionary if content was smth creepy
@@ -1536,9 +1549,9 @@ def new_project_dialog(request):
         This view provides a dialog to create a new Project in DB.
     """
     project_form = breezeForms.NewProjectForm(request.POST or None)
-    print("first time")
+    #print("first time")
     if project_form.is_valid():
-        print("second time")
+        #print("second time")
         aux.save_new_project(project_form, request.user)
         return HttpResponseRedirect('/home/projects')
 

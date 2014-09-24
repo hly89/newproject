@@ -17,5 +17,12 @@
       <a href="#" data-toggle="modal" class="btn btn-danger" data-target="#Del" onclick="$('#del_btn').attr('href', '/scripts/delete/{{ scr.id }}'); $('#del_title').text('{{ scr.name }}');" class="btn btn-danger" ><i class="icon-trash"></i></a><br />
     {% endif %}
     </td>
+    <td style="vertical-align: middle">
+        {% if scr.status%}
+         <span class="badge badge-success">YES</span> 
+        {% else %}
+        <span class="badge badge-danger">NO</span> 
+        {% endif %}
+    </td>
   </tr>
 {% endfor %}

@@ -123,8 +123,15 @@
           </div>
           <!-- Agreement =====================-->
           <div class="tab-pane" id="agreement">
-              <form id="description_form" class="form-horizontal" action="/resources/scripts/script-editor/update/{{ script.id }}" method="post">
+              <div>
+              <div class="alert alert-info fade in" id="agreement_alert" style="display:none;">
+                <button type="button" class="close" data-dismiss="alert">&times;</button>
+                <strong> Done! </strong> Agreement has been saved.
+              </div>
+          </div>
+              <form id="agreement_form" class="form-horizontal" action="/resources/scripts/script-editor/update/{{ script.id }}" method="post">
                   {% csrf_token %}
+                  <input type="hidden" name="form_name" value="agreement">
               <div class="control-group">
                   <div class="controls">
                       <textarea id="agreement_content" class="input-xxlarge" rows="11" name="agreement_content" > </textarea>
@@ -270,9 +277,18 @@ $(document).ready(function() {
       $(".alert").addClass("in");
       $("#description_alert").show();
   }
+  
+  function showAlertAgreement() {
+      $(".alert").addClass("in");
+      $("#agreement_alert").show();
+  }
 
   function closeAlert() {
-      $("#description_alert").hide();
+      $("#agreement_alert").hide();
+  }
+  
+  function closeAlertAgreement(){
+      $("#agreement_alert").hide();
   }
 
   var  myhtmlEditor = $('#description_field').wysihtml5({
@@ -291,6 +307,7 @@ $(document).ready(function() {
   });
   
   $.getJSON('/resources/scripts/script-editor/get-content/agreement-{{ script.id }}', function(data) {
+      //console.log(data.agreement);
     agreement.data("wysihtml5").editor.setValue(data.agreement);
   });
 
@@ -304,8 +321,28 @@ $(document).ready(function() {
       success: function(response){
         if (response == "False") alert("Description can not be saved!");
         else {
-          showAlert();
-          window.setTimeout(closeAlert, 2000);
+            showAlert();
+            window.setTimeout(closeAlert, 2000);
+          //window.setTimeout($("#agreement_alert").hide();, 2000);
+        }
+
+      }
+    });
+  });
+  
+  
+  // update agreement
+  $('#agreement_form').submit(function(ev){
+    ev.preventDefault(); // prevent default submition
+    $.ajax({
+      type: $(this).attr('method'),
+      url: $(this).attr('action'),
+      data: $(this).serialize(),
+      success: function(response){
+        if (response == "False") alert("Agreement can not be saved!");
+        else {
+          showAlertAgreement();
+          window.setTimeout(closeAlertAgreement, 2000);
         }
 
       }

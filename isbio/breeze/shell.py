@@ -30,7 +30,10 @@ def init_script(name, inline, person):
         dbitem.code.save('name.r', base.ContentFile('# copy and paste main code here...'))
         #print("hi")
         dbitem.save()
-
+        
+        # add edit right to user-self
+        dbitem.edit_access.add(person)
+        
         root = xml.Element('rScript')
         root.attrib['ID'] = str(dbitem.id)
         input_array = xml.Element('inputArray')
@@ -57,10 +60,14 @@ def init_pipeline(form, user):
     """
     # First Save the data that comes with a form:
     # 'type', 'description', 'search', 'access'
-    print(user)
+    #print(user)
+    
     new_pipeline = breeze.models.ReportType()
     author = User.objects.get(username=user)
     new_pipeline.author = author
+    # get user's institute info
+    insti = breeze.models.UserProfile.objects.get(user=author).institute_info
+    new_pipeline.institute = insti
     new_pipeline.type = form.cleaned_data['type']
     new_pipeline.description = form.cleaned_data['description']
     new_pipeline.search = form.cleaned_data['search']

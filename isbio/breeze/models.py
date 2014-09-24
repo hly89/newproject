@@ -25,13 +25,20 @@ class Post(models.Model):
 
     def __unicode__(self):
         return self.title
+        
+
+class Institute(models.Model):
+    institute = models.CharField(max_length=75)
+    def __unicode__(self):
+        return self.institute
 
 class Project(models.Model):
     name = models.CharField(max_length=50, unique=True)
     manager = models.CharField(max_length=50)
     pi = models.CharField(max_length=50)
     author = ForeignKey(User)
-
+    # store the institute info of the user who creates this report
+    institute = ForeignKey(Institute)
     collaborative = models.BooleanField(default=False)
 
     wbs = models.CharField(max_length=50, blank=True)
@@ -57,6 +64,8 @@ class ReportType(models.Model):
     # tags = models.ManyToManyField(Rscripts, blank=True)
     # who creates this report
     author = ForeignKey(User)
+    # store the institute info of the user who creates this report
+    institute = ForeignKey(Institute)
     def file_name(self, filename):
         fname, dot, extension = filename.rpartition('.')
         slug = slugify(str(self.id) + '_' + self.type)
@@ -106,6 +115,10 @@ class Rscripts(models.Model):
     access = models.ManyToManyField(User, null=True, blank=True, default=None, related_name="users")
     #install date info
     install_date = models.ManyToManyField(User_date, blank=True, null=True, default=None, related_name="installdate")
+    # status if on shelf or off shelf
+    status = models.BooleanField(default=False)
+    # edit access
+    edit_access = models.ManyToManyField(User, null=True, blank=True, default=None, related_name="edit_scripts")
     def file_name(self, filename):
         fname, dot, extension = filename.rpartition('.')
         slug = slugify(self.name)
@@ -201,10 +214,7 @@ class InputTemplate(models.Model):
     def __unicode__(self):
         return self.name
 
-class Institute(models.Model):
-    institute = models.CharField(max_length=75)
-    def __unicode__(self):
-        return self.institute
+
 
 class UserProfile(models.Model):
     user = models.ForeignKey(User, unique=True)

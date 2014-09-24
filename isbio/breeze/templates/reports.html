@@ -55,7 +55,7 @@
          <select id="filt_author" name="filt_author" class="input-medium" >
            <option id="" value="" >All Authors</option>
            {% for item in users %}
-             <option id="{{ item.id }}" value="{{ item.username }}" >{{ item.username }}</option>
+             <option id="{{ item.user.id }}" value="{{ item.user.username }}" >{{ item.user.username }}</option>
            {% endfor %}
          </select>
          <select id="filt_project" name="filt_project" class="input-medium" >
