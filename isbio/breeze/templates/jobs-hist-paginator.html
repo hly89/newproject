@@ -1,7 +1,7 @@
 {% for job in history_script %}
   <tr>
     <td>{{ job.staged }}</td>
-    <td> {{job.created }}</td>
+    <td>  later...</td>
     <td>{{ job.jname }}</td>
     <td></td>
     <!-- Status Label -->
@@ -46,5 +46,9 @@
 
     <!-- Delete Button -->
     <td><a href="#" data-toggle="modal" class="btn btn-danger" data-target="#Del" onclick="$('#del_btn').attr('href', '{{ job.delhref }}'); $('#del_title').text('{{ job.jname }}');" ><i class="icon-trash"></i></a></td>
+  </tr>
+  {% empty %}
+  <tr>
+      <td></td><td>No finished scripts!</td><td></td><td></td><td></td><td></td><td></td><td></td>
   </tr>
 {% endfor %}

@@ -94,6 +94,8 @@ class User_date(models.Model):
     
     def __unicode__(self):
         return self.user.username
+        
+
 
 class Rscripts(models.Model):
     name = models.CharField(max_length=35, unique=True)

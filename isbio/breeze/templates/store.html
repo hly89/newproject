@@ -79,7 +79,7 @@
                           <td style="vertical-align: middle"><strong>{{ scr.name }} <br /> <span class="subscript"> (author: {{ scr.author }}) </span> </strong></td>
                           <td style="vertical-align: middle"><i>{{ scr.creation_date }}</i></td>
                           <td style="vertical-align: middle">
-                            <a href="#" data-toggle="modal" class="btn btn-primary describe" data-target="#Describe" data-param={{ scr.id }}>
+                            <a href="#" data-toggle="modal" class="btn btn-primary describe" data-target="#Descr" data-param={{ scr.id }}>
                               <i class="icon-info-sign icon-white"></i>
                             </a>
                           </td>
@@ -133,7 +133,7 @@
                         <td style="vertical-align: middle"><strong>{{ scr.name }} <br /> <span class="subscript"> (author: {{ scr.author }}) </span> </strong></td>
                         <td style="vertical-align: middle"><i>{{ scr.creation_date }}</i></td>
                         <td style="vertical-align: middle">
-                          <a href="#" data-toggle="modal" class="btn btn-primary describe" data-target="#Describe" data-param={{ scr.id }}>
+                          <a href="#" data-toggle="modal" class="btn btn-primary describe" data-target="#Descr" data-param={{ scr.id }}>
                             <i class="icon-info-sign icon-white"></i>
                           </a>
                         </td>
@@ -237,7 +237,7 @@
 <div class="row-fluid">&nbsp;</div>
 
 
-<div id="Describe" class="modal fade" role="dialog"  aria-hidden="true" style="background: url('/static/nail.png');"></div>
+<div id="Descr" class="modal fade" role="dialog"  aria-hidden="true" style="background: url('/static/nail.png');"></div>
 
 <div id="WarningInfo" class="modal hide " role="dialog"  aria-hidden="true">
   <div class="modal-header">
@@ -277,6 +277,18 @@ $(document).ready(function() {
   $('.dotmatix_samples').multiselect(multiConfigurationSet);
     
     
+  $(".describe").click(function(ev) {
+    ev.preventDefault(); // prevent navigation
+    var par = $(this).data("param");
+
+    //console.log("clicked");
+    $("#Descr").load("/scripts/read-descr/"+par, function() {
+      //console.log("ajax sent");
+      $(this).modal('show');
+    });
+    return false; // prevent the click propagation
+  });
+    
   
   $('.switch').on('switch-change', function (event, state) {
       var value = state.value;
@@ -284,7 +296,7 @@ $(document).ready(function() {
       //console.log(tar);
       var par = $(this).data("param");
       if(value){
-          console.log("on");
+          //console.log("on");
           $(tar).load(par, function(){
               $(tar).collapse('show');
               $(".describe").click(function(ev) {
@@ -353,17 +365,7 @@ $(document).ready(function() {
       //console.log(value);
   }); 
 
-  $(".describe").click(function(ev) {
-    ev.preventDefault(); // prevent navigation
-    var par = $(this).data("param");
-    
-    //console.log("clicked");
-    $("#Describe").load("/scripts/read-descr/"+par, function() {
-      //console.log("ajax sent");
-      $(this).modal('show');
-    });
-    return false; // prevent the click propagation
-  });
+
   
 
   
@@ -470,7 +472,7 @@ $(document).ready(function() {
             ev.preventDefault(); // prevent navigation
             var par = $(this).data("param");
             //console.log("clicked");
-            $("#Describe").load("/scripts/read-descr/"+par, function() {
+            $("#Des").load("/scripts/read-descr/"+par, function() {
               //console.log("ajax sent");
               $(this).modal('show');
             });

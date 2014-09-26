@@ -201,7 +201,7 @@ class PersonalInfo(forms.Form):
     def __init__(self, *args, **kwargs):
 
         super(PersonalInfo, self).__init__(*args, **kwargs)
-        print(kwargs)
+        #print(kwargs)
         
         self.fields['first_name'] = forms.CharField(
             max_length=55,

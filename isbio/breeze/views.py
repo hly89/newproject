@@ -279,16 +279,26 @@ def reports(request):
     # get the user's institute
     insti = UserProfile.objects.get(user=request.user).institute_info
     all_reports = Report.objects.filter(status="succeed", institute=insti).order_by('-created')
-    report_type_lst = ReportType.objects.filter(institute=insti)
-    reptypelst = list()
-    for each in report_type_lst:
-        if each.rscripts_set.all():
-            reptypelst.append(each)
+    user_rtypes = request.user.pipeline_access.all()
+    #report_type_lst = ReportType.objects.filter(institute=insti)
+    #reptypelst = list()
+    #for each in report_type_lst:
+        #if each.rscripts_set.all():
+            #reptypelst.append(each)
     #print(reptypelst)
+    
     # later all_users will be changed to all users from the same insitute
     all_users = UserProfile.objects.filter(institute_info=insti)
+    # first find all the users from the same institute, then find their accessable report types
+    reptypelst = list()
+    for each in all_users:
+        rtypes = each.user.pipeline_access.all()
+        if rtypes:
+            for each_type in rtypes:
+                if each_type not in reptypelst:
+                    reptypelst.append(each_type)
     #print(all_users)
-    all_projects = Project.objects.all()
+    all_projects = Project.objects.filter(institute=insti)
     paginator = Paginator(all_reports,30)  # show 30 items per page
 
     # If AJAX - check page from the request
@@ -309,6 +319,7 @@ def reports(request):
             'reports_status': 'active',
             'reports': reports,
             'rtypes': reptypelst,
+            'user_rtypes':user_rtypes,
             'users': all_users,
             'projects': all_projects,
             'pagination_number': paginator.num_pages
@@ -386,10 +397,10 @@ def addtocart(request, sid=None):
     # check if this item in the cart already
     try:
         
-        scr = Rscripts.objects.get(id = sid)
+        #scr = Rscripts.objects.get(id = sid)
         #print(scr.author)
         
-        items = CartInfo.objects.get(product = sid)
+        items = CartInfo.objects.get(product = sid, script_buyer=request.user)
         return HttpResponse(simplejson.dumps({"exist": "Yes"}), mimetype='application/json')
     except CartInfo.DoesNotExist:
         #print("shit")
@@ -408,10 +419,10 @@ def addtocart(request, sid=None):
 def deletecart(request, sid=None):
     #print(sid)
     try:
-        items = CartInfo.objects.get(product = sid)
+        items = CartInfo.objects.get(product = sid, script_buyer=request.user)
         cate = items.type_app
         #print(cate)
-        count_app = CartInfo.objects.filter(type_app=cate).count()
+        count_app = CartInfo.objects.filter(type_app=cate, script_buyer=request.user).count()
         #print(count_app)
         items.delete()
         #print("he")
@@ -445,6 +456,7 @@ def install(request, sid=None):
             count_app = CartInfo.objects.filter(type_app=cate).count()
             # delete this app from cart
             CartInfo.objects.get(product = sid).delete()
+            print(count_app)
             return HttpResponse(simplejson.dumps({"install_status": "Yes", 'count_app': count_app}), mimetype='application/json')
     except CartInfo.DoesNotExist:
         return HttpResponse(simplejson.dumps({"install_status": "No"}), mimetype='application/json')
@@ -465,7 +477,7 @@ def deletefree(request):
     #print("hello!")
     #print(sid)
     try:
-        items = CartInfo.objects.filter(type_app = True)
+        items = CartInfo.objects.filter(type_app = True, script_buyer = request.user)
         #products = CartInfo.objects.filter(type_app = True).values()
         #print(items)
         items.delete()
@@ -536,7 +548,7 @@ def installfree(request):
 def deletenonfree(request):
     #print(sid)
     try:
-        items = CartInfo.objects.filter(type_app = False)
+        items = CartInfo.objects.filter(type_app = False, script_buyer = request.user)
         items.delete()
  
         return HttpResponse(simplejson.dumps({"delete": "Yes"}), mimetype='application/json')
@@ -811,7 +823,8 @@ def store(request):
     categories = Script_categories.objects.all()
     cate = list()
     scripts = Rscripts.objects.filter(draft="0", istag="0")
-    count_app = CartInfo.objects.all().count()
+    # filter cartinfo by user
+    count_app = CartInfo.objects.filter(script_buyer=request.user).count()
     cat_list = dict()
     #categories = list()
     for each_cate in categories:
@@ -1645,13 +1658,14 @@ def update_user_info_dialog(request):
     #print(request.method)
     if request.method == 'POST':
         personal_form = breezeForms.PersonalInfo(request.POST)
-        print("personal_form")
+        #print(personal_form)
         if personal_form.is_valid():
             user_info.first_name = personal_form.cleaned_data.get('first_name', None)
             user_info.last_name = personal_form.cleaned_data.get('last_name', None)
             user_info.email = personal_form.cleaned_data.get('email', None)
             #user_details.fimm_group = personal_form.cleaned_data.get('group', None)
             #print(int(personal_form.cleaned_data.get('institute', None)))
+            #print(request.POST)
             user_details.institute_info = Institute.objects.get(id=request.POST['institute'])
             #print(personal_form.cleaned_data.get('institute', None))
             user_info.save()
@@ -1661,9 +1675,9 @@ def update_user_info_dialog(request):
     else:
         #print(user_details.institute_info)
         institute = tuple((user_details.institute_info.id,user_details.institute_info.institute))
-        print(institute)
+        #print(institute)
         personal_form = breezeForms.PersonalInfo(initial={'first_name': user_info.first_name, 'last_name': user_info.last_name, 'email': user_info.email,'institute': user_details.institute_info.id})
-        print(personal_form)
+        #print(personal_form)
 
     return render_to_response('forms/basic_form_dialog.html', RequestContext(request, {
         'form': personal_form,
