@@ -339,7 +339,7 @@ def ajax_patients_data(request, which):
     """
     # copy parameters
     params = request.GET
-
+    #print(which)
     # Call corresponding rora (R) function
     data_tbl = rora.get_patients_info(params, str(which))
 
@@ -364,7 +364,7 @@ def ajax_rora_action(request):
 
 
     action = params.get('action', '')
-
+    #print(params)
     if action == 'remove':
         # Clean up row IDs:
         ids = aux.clean_up_dt_id( params.getlist('id[]', '') )
@@ -374,10 +374,22 @@ def ajax_rora_action(request):
 
     elif action == 'create':
         data = dict()
-        data['group_name'] = params.get('data[group_name]', '')
-        data['group_user'] = params.get('group_author', 'unknown')
-
-        if len(data['group_name']):
+        if table == 'groups':
+            data['group_name'] = params.get('data[group_name]', '')
+            data['group_user'] = params.get('group_author', 'unknown')
+        
+            if len(data['group_name']):
+                feedback = rora.insert_row(table=table, data=data)
+        elif table == 'patients':
+            data['identifier'] = params.get('data[IDENTIFIER]', '')
+            data['source'] = params.get('data[SOURCE_IDENTIFIER]', '')
+            data['description'] = params.get('data[DESCRIPTION]', '')
+            data['sex'] = params.get('data[SEX_ID]', '')
+            data['birthdate'] = params.get('data[BIRTHDATE]', '')
+            data['organism'] = params.get('data[ORGANISM_ID]', '')
+            #print(params)
+            #data = params
+            #print(data)
             feedback = rora.insert_row(table=table, data=data)
 
     elif action == 'edit':

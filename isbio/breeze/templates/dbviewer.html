@@ -577,7 +577,12 @@ $(document).ready(function() {
             { "label": "Birth date:",   "name": "BIRTHDATE",          "type": "date",  "dateFormat": "yy-mm-dd", "opts": { "changeMonth": true, "changeYear": true }  }
         ]
     } );
-
+    
+    patientEdit = new $.fn.dataTable.Editor( {
+        ajax: "/ajax-rora/action/",
+        table: "#patient_table"
+    } );
+  
   // Set field options:
   patientEditor.field('ORGANISM_ID').update( [ 'Homosapiens', 'Mouse'  ] );
   patientEditor.field('SEX_ID').update( [ 'Male', 'Female'  ] );

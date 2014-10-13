@@ -127,8 +127,11 @@ def insert_row(table, data):
         r_getterFunc = ro.globalenv['createScreenGroup']
 
         r_getter_output = r_getterFunc(data['group_user'], data['group_name'])
-
-
+    elif table == "patients":
+        #print(data)
+        r_getterFunc = ro.globalenv['createPatient']
+        print(ro.DataFrame(data))
+        r_getter_output = r_getterFunc(ro.DataFrame(data))
     return True
 
 def remove_row(table, ids):
