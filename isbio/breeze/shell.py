@@ -275,7 +275,7 @@ def run_job(job, script=None):
         job.status = 'failed'
 
     job.save()
-
+    s.exit()
     os.chdir(default_dir)
     return True
 
@@ -328,8 +328,21 @@ def run_report(report):
     report.save()
 
     # aux.open_folder_permissions(loc, 0777)
-
+    s.exit()
     os.chdir(default_dir)
+    return True
+    
+def abort_report(report):
+    
+    s = drmaa.Session()
+    s.initialize()
+    print(report.sgeid)
+    s.control(report.sgeid, drmaa.JobControlAction.TERMINATE)
+    report.status = "aborted"
+    report.save()
+    s.exit()
+    
+    
     return True
 
 def track_sge_job(job):

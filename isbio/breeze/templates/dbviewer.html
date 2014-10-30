@@ -14,12 +14,14 @@
   <link rel="stylesheet" href="/static/css/jquery.dataTables.min.css" type="text/css"/>
   <link rel="stylesheet" href="/static/css/dataTables.tableTools.min.css" type="text/css"/>
   <link rel="stylesheet" href="/static/css/dataTables.editor.min.css" type="text/css"/>
+  <link rel="stylesheet" href="/static/css/jquery.qtip.css" type="text/css"/>
 
 
   <script type="text/javascript" src="/static/js/jquery.dataTables.min.js"></script>
   <script type="text/javascript" src="/static/js/dataTables.tableTools.min.js"></script>
   <script type="text/javascript" src="/static/js/dataTables.editor.js"></script>
   <script type="text/javascript" src="/static/js/livevalidation_standalone.js"></script>
+  <script type="text/javascript" src="/static/js/jquery.qtip.js"></script>
  <!--<script type="text/javascript" src="/static/js/dataTables.editor.min.js"></script>-->
 
   <script type="text/javascript" src="/static/js/bootstrap-multiselect.js"></script>
@@ -548,6 +550,30 @@ $(document).ready(function() {
     tableTools: {
         sRowSelect: "multi",
         aButtons: [
+            { sExtends: "select_single", sButtonText: 'Edit',
+                fnClick: function() {
+                    if ( screenTable.row('.selected').length !== 0 ){
+                        var url = "/screen-data/"+screenTable.cell('.selected', 0).data();
+                       
+                        $("#patientEdit").load(url,function(){
+                            $('.multiselect').multiselect(multiConfigurationSet);
+                            $("#patientEdit").modal('show');
+                            $('#id_alias').qtip({ // Grab some elements to apply the tooltip to
+                                content: {
+                                    title: 'Name Convention',
+                                    text: '<b>Rules</b>: PatientIdentifier_SamplingDate_SamplingTime_TissuseSourceCode_Media_ReadOut'+
+                                    '<br> <b> Example </b>: <br> <b>Patient identifer</b>: source.PatientNumer (e.g. FHRB.303)<br> <b>Sampling date</b>: 230914 <br>'+
+                                    '<b>Sampling time</b>: 1130 <br> <b>Tiusse source code</b>: PB <br> <b>Media</b>: CM <br> <b>Readout</b>: RPPA'+ 
+                                    '<br> <b>Final Breeze Alias</b>:<br>FHRB.303_230914_1130_PB_CM_RPPA'
+                                },
+                                style: {
+                                    classes: 'qtip-bootstrap'
+                                }
+                            })
+                        });
+                    }
+                }
+            },
             { sExtends: "editor_remove", editor: screenCreator },
             {
               sExtends: 'select_single',
@@ -686,6 +712,18 @@ $(document).ready(function() {
         tableTools: {
           sRowSelect: "multi",
           aButtons: [
+          {
+            sExtends: 'select_single',
+            sButtonText: 'New',
+            fnClick: function() {
+                //generate new compound
+                var url = "/compound-new/";
+                $("#patientEdit").load(url,function(){
+                    $('.multiselect').multiselect(multiConfigurationSet);
+                    $("#patientEdit").modal('show');
+                });
+            }
+          },
             {
               sExtends: 'select_single',
               sButtonText: 'Generate Report',
@@ -697,6 +735,7 @@ $(document).ready(function() {
                 }
               }
             }
+            
           ]
         }
   } );  // #compounds_table

@@ -129,6 +129,38 @@ def patient_data(id):
     return data
     
 
+def screen_data(id):
+    """
+          Return one row from table by ID
+    """
+    # Source & export R code
+    rcode = 'source("%s%s")' %(settings.RORA_LIB,'patient-module.R')
+    ro.r( rcode )
+    # Export a function to call
+    r_getterFunc = ro.globalenv['searchScreen']
+    
+    # R call
+    data = r_getterFunc(id)
+    return data
+    
+def get_all_patient():
+    """"
+         Return all patients data (id and identifier)
+    """
+    
+    # Source & export R code
+    rcode = 'source("%s%s")' %(settings.RORA_LIB,'patient-module.R')
+    ro.r( rcode )
+    
+    # Export a function to call
+    r_getterFunc = ro.globalenv['getAllPatient']
+    
+    # R call
+    data = r_getterFunc()
+    
+    return data
+    
+
 def sex_data():
     """"
          Return all possible sex category
@@ -142,7 +174,127 @@ def sex_data():
     
     # R call
     data = r_getterFunc()
+    return data
     
+def media_type():
+    """"
+         Return all possible media types
+    """
+    # Source & export R code
+    rcode = 'source("%s%s")' %(settings.RORA_LIB,'patient-module.R')
+    ro.r( rcode )
+    
+    # Export a function to call
+    r_getterFunc = ro.globalenv['searchMediaType']
+    
+    # R call
+    data = r_getterFunc()
+    return data
+    
+def sample_type():
+    """"
+         Return all possible media types
+    """
+    # Source & export R code
+    rcode = 'source("%s%s")' %(settings.RORA_LIB,'patient-module.R')
+    ro.r( rcode )
+    
+    # Export a function to call
+    r_getterFunc = ro.globalenv['searchSampleType']
+    
+    # R call
+    data = r_getterFunc()
+    return data
+    
+    
+def disease_sub_type():
+    """"
+         Return all possible media types
+    """
+    # Source & export R code
+    rcode = 'source("%s%s")' %(settings.RORA_LIB,'patient-module.R')
+    ro.r( rcode )
+    
+    # Export a function to call
+    r_getterFunc = ro.globalenv['searchDiseaseSubType']
+    
+    # R call
+    data = r_getterFunc()
+    return data
+    
+def histology():
+    """"
+         Return all possible histology
+    """
+    # Source & export R code
+    rcode = 'source("%s%s")' %(settings.RORA_LIB,'patient-module.R')
+    ro.r( rcode )
+    
+    # Export a function to call
+    r_getterFunc = ro.globalenv['searchHistology']
+    
+    # R call
+    data = r_getterFunc()
+    return data
+    
+def disease_state_data():
+    """"
+         Return all possible disease states
+    """
+    # Source & export R code
+    rcode = 'source("%s%s")' %(settings.RORA_LIB,'patient-module.R')
+    ro.r( rcode )
+    
+    # Export a function to call
+    r_getterFunc = ro.globalenv['searchDiseaseState']
+    
+    # R call
+    data = r_getterFunc()
+    return data
+    
+def experiment_type_data():
+    """"
+         Return all possible disease states
+    """
+    # Source & export R code
+    rcode = 'source("%s%s")' %(settings.RORA_LIB,'patient-module.R')
+    ro.r( rcode )
+    
+    # Export a function to call
+    r_getterFunc = ro.globalenv['searchExperimentType']
+    
+    # R call
+    data = r_getterFunc()
+    return data
+    
+def disease_grade_data():
+    """"
+         Return all possible disease grades
+    """
+    # Source & export R code
+    rcode = 'source("%s%s")' %(settings.RORA_LIB,'patient-module.R')
+    ro.r( rcode )
+    
+    # Export a function to call
+    r_getterFunc = ro.globalenv['searchDiseaseGrade']
+    
+    # R call
+    data = r_getterFunc()
+    return data
+
+def disease_stage_data():
+    """"
+         Return all possible disease stages
+    """
+    # Source & export R code
+    rcode = 'source("%s%s")' %(settings.RORA_LIB,'patient-module.R')
+    ro.r( rcode )
+    
+    # Export a function to call
+    r_getterFunc = ro.globalenv['searchDiseaseStage']
+    
+    # R call
+    data = r_getterFunc()
     return data
     
 def organism_data():
@@ -160,6 +312,21 @@ def organism_data():
     data = r_getterFunc()
     
     return data
+def read_out_data():
+    """"
+        Return all possible organism options
+    """
+    # Source & export R code
+    rcode = 'source("%s%s")' %(settings.RORA_LIB,'patient-module.R')
+    ro.r( rcode )
+    
+    # Export a function to call
+    r_getterFunc = ro.globalenv['searchReadOut']
+    
+    # R call
+    data = r_getterFunc()
+    
+    return data
     
 def update_patient(data):
     # Source & export R code
@@ -171,6 +338,18 @@ def update_patient(data):
     # R call
     update = r_getterFunc(ro.DataFrame(data))
     return True
+    
+def update_screen(data):
+    # Source & export R code
+    rcode = 'source("%s%s")' %(settings.RORA_LIB,'patient-module.R')
+    ro.r( rcode )
+    # Export a function to call
+    r_getterFunc = ro.globalenv['updateScreen']
+    
+    # R call
+    update = r_getterFunc(ro.DataFrame(data))
+    return True
+    
 def insert_row(table, data):
     """
         Adds a new record to one of the tables in RORA
